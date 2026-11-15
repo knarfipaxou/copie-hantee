@@ -1,0 +1,842 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover,interactive-widget=resizes-content">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Copie hantée"><meta name="theme-color" content="#2b2b2b">
+<title>La Copie hantée</title><style>*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#1d1d1d;font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#222;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.hide{display:none!important}
+.screen{position:fixed;inset:0;display:none;flex-direction:column}
+.screen.on{display:flex}
+.btn{font:inherit;font-weight:800;font-size:16px;color:#fff;text-shadow:2px 2px 0 #0007;background:#8b8b8b;border:3px solid #000;box-shadow:inset 3px 3px 0 #ffffff70,inset -3px -3px 0 #0006;padding:8px 14px;min-height:46px;cursor:pointer;border-radius:0;touch-action:manipulation}
+.btn:active{transform:translateY(2px)}
+.btn.green{background:#3c8527}.btn.yellow{background:#c9a227}.btn.purple{background:#7b3fb5}.btn.red{background:#a8322d}
+.btn.big{font-size:22px;padding:12px 26px;min-height:58px}
+.btn:disabled{opacity:.45}
+.mut{color:#555}.small{font-size:13px}
+/* titre */
+#title{background:linear-gradient(#5aa0e6 0 55%,#5c9a3a 55% 60%,#7a5531 60% 100%);align-items:center;justify-content:center}
+.tbox{background:#c6c6c6;border:4px solid #000;box-shadow:inset 4px 4px 0 #fff,inset -4px -4px 0 #555,0 20px 50px #0008;padding:26px 34px;text-align:center;max-width:640px;margin:16px}
+.tbox h1{margin:8px 0;font-size:46px;line-height:1;letter-spacing:2px;color:#4caf50;text-shadow:4px 4px 0 #1b4d1b}
+.tbox h1 span{display:block}.tbox h1 span+span{color:#e8e8e8;text-shadow:4px 4px 0 #333}
+.tag{font-size:18px;font-weight:600}
+.tcreeper{width:96px;height:96px;margin:0 auto}
+/* carte */
+#map{background:#3b2a1a url() ;background-image:linear-gradient(45deg,#4a3420 25%,transparent 25%,transparent 75%,#4a3420 75%),linear-gradient(45deg,#4a3420 25%,transparent 25%,transparent 75%,#4a3420 75%);background-size:48px 48px;background-position:0 0,24px 24px}
+.hud{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#2b2b2b;border-bottom:4px solid #000;color:#fff;padding-top:max(8px,env(safe-area-inset-top))}
+.logo{font-size:20px;text-shadow:2px 2px 0 #000}
+.sp{flex:1}
+.gauge{display:flex;align-items:center;gap:10px;margin-left:12px}
+.gbar{position:relative;width:300px;height:22px;background:#111;border:3px solid #000;box-shadow:inset 0 0 0 2px #444}
+.gbase{position:absolute;left:0;top:0;bottom:0;width:45%;background:repeating-linear-gradient(90deg,#6c8f3a 0 13px,#4d6b26 13px 15px)}
+.gwon{position:absolute;left:45%;top:0;bottom:0;width:0;background:repeating-linear-gradient(90deg,#7cff4a 0 13px,#3fbf1f 13px 15px);transition:width .9s}
+#gTxt{font-size:20px;color:#b9ff8c;text-shadow:2px 2px 0 #000;min-width:92px}
+.paper{flex:1;margin:12px 14px 6px;background:#fbf8ee;border:4px solid #000;box-shadow:inset 0 0 0 3px #d9cfb4,0 10px 30px #0008;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:0;overflow:auto;
+ background-image:repeating-linear-gradient(#fbf8ee 0 23px,#c9d7ee 23px 24px);position:relative}
+.paper:before{content:"";position:absolute;left:54px;top:0;bottom:0;width:2px;background:#e9a0a0;pointer-events:none}
+.zone{position:relative;padding:10px 12px 10px 64px;border:2px dashed #b9ae90;margin:6px;min-height:150px}
+.zone h3{margin:0 0 6px;font-size:17px;color:#2b2b2b}
+.zone .znote{position:absolute;right:10px;top:8px;font-weight:900;color:#c62828;font-size:18px;transform:rotate(-6deg);border:2px solid #c62828;padding:0 6px;border-radius:6px;background:#fff8}
+.creepers{display:flex;flex-wrap:wrap;gap:12px;margin-top:4px}
+.cr{position:relative;width:132px;padding:6px;border:3px solid #000;background:#c6c6c6;box-shadow:inset 3px 3px 0 #fff,inset -3px -3px 0 #555;text-align:center;cursor:pointer;font-size:12px;font-weight:700;touch-action:manipulation}
+.cr .face{width:52px;height:52px;margin:0 auto 4px;animation:bob 2.4s ease-in-out infinite}
+.cr .his{display:block;color:#c62828;text-decoration:line-through;font-family:"Bradley Hand","Segoe Script",cursive;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cr .pts{display:block;color:#2b2b2b}
+.cr.done{background:#f4d35e;box-shadow:inset 3px 3px 0 #fff6b0,inset -3px -3px 0 #a07c10}
+.cr.done .face{animation:none}
+.cr.done .his{color:#2d7a22;text-decoration:none}
+@keyframes bob{50%{transform:translateY(-4px)}}
+.portalRow{display:flex;align-items:center;gap:14px;padding:6px 16px 12px;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+.portal{width:58px;height:70px;border:6px solid #1a0f2e;background:#1a0f2e;position:relative;overflow:hidden}
+.portal .pglow{position:absolute;inset:0;background:repeating-linear-gradient(45deg,#8a2be2 0 6px,#5b1a9e 6px 12px);animation:pg 1.2s linear infinite;opacity:.35}
+.portal.open .pglow{opacity:1}
+@keyframes pg{to{background-position:24px 0}}
+.ptxt{color:#fff;font-weight:700;text-shadow:2px 2px 0 #000;flex:1}
+/* panneaux */
+.panel{position:fixed;z-index:50;left:50%;top:max(2vh,env(safe-area-inset-top));transform:translate(-50%,0);width:min(980px,97vw);max-height:96vh;max-height:96dvh;display:none;flex-direction:column;background:#c6c6c6;border:4px solid #000;box-shadow:inset 4px 4px 0 #fff,inset -4px -4px 0 #555,0 20px 60px #000c}
+.panel.on{display:flex}
+.panel.small{width:min(640px,94vw);top:6vh}
+.phead{display:flex;align-items:center;gap:10px;background:#3a3a3a;color:#fff;padding:6px 10px;border-bottom:4px solid #000}
+.phead h2{margin:0;font-size:19px;text-shadow:2px 2px 0 #000;flex:1}
+.xbtn{min-height:40px;padding:4px 12px}
+.pips{display:flex;gap:3px;flex-wrap:wrap;max-width:46%}
+.pips i{width:12px;height:12px;background:#555;border:2px solid #000;display:block}
+.pips i.ok{background:#7cff4a}.pips i.cur{background:#f4d35e}.pips i.tw{border-color:#7b3fb5}
+.pbody{padding:10px 14px 12px;overflow:auto;-webkit-overflow-scrolling:touch}
+.scene{display:flex;gap:14px;align-items:center}
+.bigface{width:84px;height:84px;flex:none;transition:transform .2s}
+.bigface.hurt{animation:hurt .4s}
+@keyframes hurt{30%{transform:translateX(-8px) rotate(-6deg);filter:brightness(1.8) sepia(1) hue-rotate(-50deg)}70%{transform:translateX(8px) rotate(6deg)}}
+.bigface.boom{animation:boom .7s forwards}
+@keyframes boom{40%{transform:scale(1.5);filter:brightness(3)}100%{transform:scale(0);opacity:0}}
+.bubble{flex:1;background:#fff;border:3px solid #000;padding:8px 12px;position:relative;font-size:15px}
+.bubble b.q{display:block;margin-bottom:4px}
+.bubble .hisw{color:#c62828;font-family:"Bradley Hand","Segoe Script",cursive;font-size:18px;text-decoration:line-through;text-decoration-thickness:2px}
+.ctx{margin:8px 0}
+.prompt{font-size:19px;font-weight:700;margin:8px 0 6px;color:#1b1b1b}
+textarea#ch-in{width:100%;font:inherit;font-size:21px;padding:10px 12px;border:3px solid #373737;background:#fff;border-radius:0;resize:none;min-height:54px;-webkit-user-select:text;user-select:text;line-height:1.35}
+textarea#ch-in:focus{outline:3px solid #f4d35e}
+.msg{min-height:24px;font-weight:800;font-size:16px;margin:6px 0}
+.msg.ok{color:#1f6d12}.msg.ko{color:#b3261e}.msg.near{color:#b86b00}
+.rule{background:#fff6d6;border:3px solid #c9a227;padding:8px 12px;font-size:15px;margin:6px 0}
+.rule b{color:#7a5a00}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
+/* forge (tables) */
+.anvil{display:grid;grid-template-columns:112px 1fr 1fr;gap:4px;max-width:560px}
+.anvil div{border:2px solid #000;padding:5px 8px;font-weight:700;font-size:16px;min-height:34px;background:#8b8b8b;color:#eee;text-shadow:1px 1px 0 #000}
+.anvil .h{background:#3a3a3a}
+.anvil .c{background:#d6d6d6;color:#333;text-shadow:none;font-size:14px}
+.anvil .ing{background:linear-gradient(#f9e27a,#d4a017);color:#3a2a00;text-shadow:none;animation:drop .35s}
+.anvil .cur{outline:4px solid #f4d35e;background:#5a5a5a}
+.anvil .old{color:#ff9a9a;text-decoration:line-through;font-family:"Bradley Hand",cursive;font-size:15px}
+@keyframes drop{from{transform:translateY(-16px);opacity:0}}
+.conj{display:flex;gap:6px;flex-wrap:wrap}
+.conj span{border:2px solid #000;background:#8b8b8b;color:#fff;padding:6px 10px;font-weight:800;text-shadow:1px 1px 0 #000}
+.conj span.ing{background:linear-gradient(#f9e27a,#d4a017);color:#3a2a00;text-shadow:none}
+/* chantier */
+.sent{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
+.blk{border:3px solid #000;padding:8px 12px;font-size:20px;font-weight:800;background:#9e9e9e;color:#fff;text-shadow:2px 2px 0 #0008;box-shadow:inset 3px 3px 0 #ffffff55,inset -3px -3px 0 #0005;position:relative;min-width:54px;text-align:center}
+.blk small{display:block;font-size:11px;font-weight:700;text-shadow:none;color:#fff;opacity:.95}
+.blk.cur{outline:4px solid #f4d35e;transform:translateY(-3px)}
+.blk.nom{background:#c9a227}.blk.acc{background:#b23a32}.blk.gen{background:#7b3fb5}.blk.dat{background:#2f6fd0}.blk.abl{background:#2e8b3a}.blk.voc{background:#d0743c}.blk.verbe{background:#4a4a4a}
+.legend{font-size:12px;display:flex;gap:8px;flex-wrap:wrap;margin:2px 0}
+.legend i{display:inline-block;width:12px;height:12px;border:2px solid #000;vertical-align:-2px;margin-right:3px}
+.villa{display:grid;grid-template-columns:repeat(12,18px);grid-auto-rows:14px;gap:1px;margin:6px 0;height:0;transition:height .3s}
+.villa.on{height:auto}
+.villa i{display:block;background:#f1e3b8;border:2px solid #6d5a2c;animation:drop .3s}
+.vlab{font-size:12px;font-weight:700;color:#444}
+.villa i.roof{background:#a8322d;border-color:#5d1512}
+.trad{font-size:17px;font-weight:700;color:#1f6d12;margin:4px 0}
+/* thème */
+.theme{display:grid;gap:4px;grid-auto-flow:column;grid-template-rows:auto auto;justify-content:start;overflow-x:auto}
+.theme .fr{background:#fff;border:2px solid #000;padding:6px 8px;font-size:15px;font-weight:700}
+.theme .la{border:3px solid #000;padding:6px 8px;font-size:18px;font-weight:800;background:#8b8b8b;color:#fff;min-height:40px;text-shadow:1px 1px 0 #000}
+.theme .la.ing{background:linear-gradient(#f9e27a,#d4a017);color:#3a2a00;text-shadow:none}
+.theme .la.bad{background:#7a2a2a}
+.theme .la.bad s{color:#ffb3b3;font-family:"Bradley Hand",cursive;font-weight:400}
+.theme .la.cur{outline:4px solid #f4d35e}
+/* tables */
+.tlist{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tlist .btn{text-align:left;font-size:15px}
+.tlist .btn small{display:block;font-weight:600;opacity:.85}
+/* boss */
+.bossbar{display:flex;align-items:center;gap:10px;flex:1}
+.hp{flex:1;height:18px;background:#300;border:3px solid #000;position:relative}
+.hp i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(#e33,#900);transition:width .5s}
+.golem{width:84px;height:84px;flex:none}
+.score{font-size:42px;font-weight:900;color:#2d7a22;text-shadow:3px 3px 0 #0002}
+.recap{font-size:14px;max-height:220px;overflow:auto;background:#fff;border:2px solid #000;padding:6px 10px}
+.recap div{padding:2px 0;border-bottom:1px solid #eee}
+.recap .ok{color:#1f6d12}.recap .ko{color:#b3261e}
+#toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:#000c;color:#fff;font-weight:800;padding:10px 18px;border:3px solid #000;display:none;z-index:9999}
+#toast.on{display:block}
+.particles{position:fixed;pointer-events:none;z-index:200}
+.particles i{position:absolute;width:10px;height:10px;background:#7cff4a;border:1px solid #000}
+@media (max-width:900px){.paper{grid-template-columns:1fr;grid-template-rows:none}.gbar{width:170px}.anvil{grid-template-columns:96px 1fr 1fr}}
+
+.cr .nt{display:block;font-size:11px;color:#333;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* VOIX : micro et Papa écoute */
+.vx{margin:6px 0;font-size:15px}
+.vxhide{display:none!important}
+.vxrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.vxb{font:inherit;font-weight:700;border:2px solid #2d2d2d;border-radius:10px;background:#fff;color:#222;padding:8px 14px;min-height:44px;cursor:pointer;touch-action:manipulation}
+.vxb.big{font-size:18px;padding:10px 18px;min-height:52px}
+.vxmic{background:#2f7de1;color:#fff;border-color:#1d4f91;font-size:18px;min-width:150px;min-height:52px}
+.vxmic.rec,.vxrmic.rec{background:#d63b3b;border-color:#8c1f1f;color:#fff;animation:vxpulse 1s infinite}
+@keyframes vxpulse{50%{box-shadow:0 0 0 6px rgba(214,59,59,.3)}}
+.vxpapa{background:#ffe7a8;border-color:#a8781a}
+.vxst{font-weight:700;font-size:14px}.vxst.vxon{color:#1d6fd0}.vxst.vxwarn{color:#b55d00}
+.vxlive{font-style:italic;color:#666;min-height:0;margin:4px 0}
+.vxchips{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}
+.vxchip{font:inherit;font-size:16px;border:2px solid #9bb7d9;background:#eef5ff;color:#123;border-radius:8px;padding:5px 8px;min-height:38px;touch-action:manipulation}
+.vxchip.on{border-color:#e08a1e;background:#ffe2b8}
+.vxedit,.vxredo{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0;padding:8px;border-radius:10px;background:#fff6e5;border:2px solid #e08a1e;color:#5a3000}
+.vxedit input,.vxredo input{font:inherit;font-size:17px;padding:8px;border:2px solid #888;border-radius:8px;min-width:160px;flex:1}
+.vxrt{width:100%;font-weight:800}
+.vxov{display:none;position:fixed;inset:0;z-index:9999;background:rgba(20,20,30,.92);align-items:center;justify-content:center;padding:16px}
+.vxov.on{display:flex}
+.vxcard{background:#fffdf5;color:#222;border-radius:16px;max-width:720px;width:100%;max-height:92vh;overflow:auto;padding:20px;font-size:18px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.vxcard h3{margin:0 0 10px}.vxtitle{font-weight:800}
+.vxcard input{font-size:24px;padding:8px;width:140px;border:2px solid #555;border-radius:8px}
+.vxbtns{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.vxfiche{background:#fff;border:2px solid #5fae55;border-radius:10px;padding:12px;line-height:1.5;margin:8px 0}
+.vxopt{opacity:.6}
+.vxg1{background:#c9f2c0;border-color:#2c7a22}.vxg2{background:#ffe2b8;border-color:#e08a1e}.vxg3{background:#ffd0d0;border-color:#b23030}
+</style></head><body>
+<div id="title" class="screen on">
+ <div class="tbox">
+  <div class="tcreeper" id="tCreeper"></div>
+  <h1><span>LA COPIE</span><span>HANTÉE</span></h1>
+  <p class="tag">Ta copie de latin est hantée : chaque erreur est devenue un creeper. Explique-la, répare-la, et récupère tes points jusqu'à 20 / 20.</p>
+  <button class="btn green big" id="bPlay">▶ Jouer</button>
+  <p class="mut small">Tu peux taper ou dicter au micro. Le son se règle sur la carte.</p>
+ </div>
+</div>
+<div id="map" class="screen">
+ <header class="hud"><b class="logo">👻 La Copie hantée</b>
+  <div class="gauge" id="gauge"><div class="gbar"><div class="gbase"></div><div class="gwon" id="gWon"></div></div><b id="gTxt">9 / 20</b></div>
+  <span class="sp"></span>
+  <button class="btn" id="bTables">📜 Tables</button><button class="btn" id="bSound">🔊</button></header>
+ <div class="paper" id="paper"></div>
+ <div class="portalRow"><div class="portal" id="portal"><div class="pglow"></div></div><div class="ptxt" id="pTxt"></div><button class="btn purple big" id="bBoss">⚔ Affronter le DT bis</button></div>
+</div>
+<div id="enc" class="panel">
+ <div class="phead"><h2 id="eHead"></h2><div class="pips" id="ePips"></div><button class="btn xbtn" id="eClose">✖</button></div>
+ <div class="pbody" id="eBody">
+  <div class="scene" id="eScene"></div>
+  <div class="ctx" id="eCtx"></div>
+  <p class="prompt" id="ePrompt"></p>
+  <div id="chWrap"><textarea id="ch-in" rows="1" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Tape ta réponse ici…"></textarea></div>
+  <div id="eRule" class="rule hide"></div>
+  <div class="msg" id="eMsg"></div>
+  <div class="row" id="eRow"><button class="btn yellow" id="eHint">💡 Indice</button><button class="btn green" id="eGo">✔ Valider</button><button class="btn green hide" id="eNext">Continuer ➜</button></div>
+ </div>
+</div>
+<div id="tables" class="panel small">
+ <div class="phead"><h2>📜 Les tables à réciter</h2><button class="btn xbtn" data-close="tables">✖</button></div>
+ <div class="pbody"><p class="mut">Choisis une table. Tu la récites en la tapant, au micro, ou devant papa avec 👂 Papa écoute.</p><div id="tList" class="tlist"></div></div>
+</div>
+<div id="toast"></div>
+
+<script>
+/* ===== Déblocage du son sur iPad (partagé entre les jeux) =====
+   1. Le contexte audio est créé et relancé dans un vrai geste (touchend, pointerup, click...).
+   2. On le relance à chaque geste et au retour dans l'appli (iOS le met en « interrupted »).
+   3. Le bouton silencieux de l'iPad coupe WebAudio : session audio « playback » (Safari 16.4+),
+      sinon un petit son muet en boucle dans une balise audio. */
+window.__snd=window.__snd||{state:"none",count:{},log:[],played:0,unlocks:0};
+const IOSAU={get:null,el:null,unlocked:false,
+ session(){try{if(navigator.audioSession&&navigator.audioSession.type!=="playback")navigator.audioSession.type="playback";}catch(e){}},
+ setup(get){this.get=get;this.session();
+  ["touchstart","touchend","pointerdown","pointerup","mousedown","click","keydown"].forEach(ev=>document.addEventListener(ev,()=>this.unlock(),{capture:true,passive:true}));
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")this.resume();});
+  window.addEventListener("pageshow",()=>this.resume());window.addEventListener("focus",()=>this.resume());},
+ watch(c){if(c&&!c.__w){c.__w=1;__snd.state=c.state;c.addEventListener("statechange",()=>{__snd.state=c.state;});}return c;},
+ resume(){const c=this.get&&this.get(false);if(!c||c.state==="running"||c.state==="closed")return;try{const p=c.resume();if(p&&p.then)p.then(()=>{__snd.state=c.state;},()=>{});}catch(e){}},
+ unlock(){const c=this.get&&this.get(true);if(!c)return;this.watch(c);this.session();
+  if(c.state!=="running"||!this.unlocked){this.resume();try{const b=c.createBuffer(1,1,22050),s=c.createBufferSource();s.buffer=b;s.connect(c.destination);s.start(0);this.unlocked=true;__snd.unlocks++;}catch(e){}}
+  if(!navigator.audioSession)this.silentLoop();},
+ silentURL(){const sr=8000,n=4000,b=new ArrayBuffer(44+n*2),v=new DataView(b);let o=0;const s=t=>{for(const ch of t)v.setUint8(o++,ch.charCodeAt(0));},u32=x=>{v.setUint32(o,x,true);o+=4;},u16=x=>{v.setUint16(o,x,true);o+=2;};
+  s("RIFF");u32(36+n*2);s("WAVE");s("fmt ");u32(16);u16(1);u16(1);u32(sr);u32(sr*2);u16(2);u16(16);s("data");u32(n*2);return URL.createObjectURL(new Blob([b],{type:"audio/wav"}));},
+ silentLoop(){try{if(!this.el){const a=document.createElement("audio");a.src=this.silentURL();a.loop=true;a.preload="auto";a.setAttribute("playsinline","");a.setAttribute("webkit-playsinline","");a.setAttribute("x-webkit-airplay","deny");this.el=a;}
+  if(this.el.paused){const p=this.el.play();if(p&&p.catch)p.catch(()=>{});}}catch(e){}},
+ /* compteur de débogage : chaque son demandé est compté dans window.__snd */
+ instrument(SND){Object.keys(SND).forEach(k=>{const f=SND[k];if(typeof f!=="function")return;SND[k]=function(...a){__snd.count[k]=(__snd.count[k]||0)+1;__snd.log.push(k);if(__snd.log.length>300)__snd.log.shift();return f.apply(this,a);};});return SND;}
+};
+
+/* ================= DONNÉES : les erreurs de la copie du DT de latin (10/11) =================
+   Chaque erreur de la copie est un creeper. pts = points perdus sur la copie, récupérés quand il explose.
+   Étapes : form (forme latine exacte), sens (phrase en français, correction tolérante sur le sens),
+            cas (cas + nombre), info (règle). Les jumelles = même piège avec un autre mot. */
+const CASES={nom:"nominatif",voc:"vocatif",acc:"accusatif",gen:"génitif",dat:"datif",abl:"ablatif"};
+const ORDER=["nom","voc","acc","gen","dat","abl"];
+const TABLES={
+ rosa:{title:"rosa, ae, f : la rose",kind:"decl",sg:["rosa","rosa","rosam","rosae","rosae","rosa"],pl:["rosae","rosae","rosas","rosarum","rosis","rosis"]},
+ dominus:{title:"dominus, i, m : le maître",kind:"decl",sg:["dominus","domine","dominum","domini","domino","domino"],pl:["domini","domini","dominos","dominorum","dominis","dominis"]},
+ puer:{title:"puer, pueri, m : l'enfant",kind:"decl",sg:["puer","puer","puerum","pueri","puero","puero"],pl:["pueri","pueri","pueros","puerorum","pueris","pueris"]},
+ ager:{title:"ager, agri, m : le champ",kind:"decl",sg:["ager","ager","agrum","agri","agro","agro"],pl:["agri","agri","agros","agrorum","agris","agris"]},
+ templum:{title:"templum, i, n : le temple",kind:"decl",sg:["templum","templum","templum","templi","templo","templo"],pl:["templa","templa","templa","templorum","templis","templis"]},
+ sum:{title:"sum, es, esse, fui : être",kind:"conj",forms:["sum","es","est","sumus","estis","sunt"],fr:["je suis","tu es","il est","nous sommes","vous êtes","ils sont"]},
+ possum:{title:"possum, potes, posse : pouvoir",kind:"conj",forms:["possum","potes","potest","possumus","potestis","possunt"],fr:["je peux","tu peux","il peut","nous pouvons","vous pouvez","ils peuvent"]},
+ composes:{title:"Les composés de sum",kind:"comp",forms:["absum","adsum","desum","praesum","prosum","possum"],fr:["je suis absent","je suis présent","je manque","je commande, je suis à la tête de","je suis utile","je peux"],
+  keys:[["absent"],["present"],["manque"],["commande","dirige","tete"],["utile"],["peux","pouvoir"]]}
+};
+/* texte pour « Papa écoute » (voix.js lit FICHES[f].title et .txt) */
+const FICHES={};
+for(const k in TABLES){const T=TABLES[k];let txt;
+ if(T.kind==="decl")txt=ORDER.map((c,i)=>`${CASES[c]} : ${T.sg[i]} / ${T.pl[i]}`).join(" • ");
+ else txt=T.forms.map((f,i)=>`${f} : ${T.fr[i]}`).join(" • ");
+ FICHES[k]={title:T.title,txt:"Singulier / pluriel • "+txt};if(T.kind!=="decl")FICHES[k].txt=txt;}
+
+const VOC=[["in + ablatif","dans"],["cum + ablatif","avec"],["equus, i, m","le cheval"],["servus, i, m","l'esclave"],["discipulus, i, m","l'élève"],["villa, ae, f","la maison"],["hortus, i, m","le jardin"],["magister, magistri, m","le maître d'école"],["deus, i, m","le dieu"],["amicus, i, m","l'ami"],["ire","aller"],["vivo, is, ere","vivre"],["enim","en effet"],["statim","aussitôt"],["semper","toujours"],["sed","mais"]];
+
+const RULE={
+ casfonc:"Nominatif = sujet ou attribut du sujet. Vocatif = apostrophe. Accusatif = COD. Génitif = complément du nom. Datif = COI. Ablatif = complément circonstanciel.",
+ er:"puer, pueri, m est un nom en -er. Au nominatif et au vocatif singulier : puer (pas de -us, pas de -e). Le radical se lit sur le génitif : pueri → puer-. Ensuite on met les terminaisons de dominus.",
+ ager:"ager, agri : le génitif agri montre que le e disparaît. Radical agr- : agrum, agri, agro… Mais nominatif et vocatif singulier : ager.",
+ masc:"puer est masculin, comme dominus : pluriel en -i, -i, -os, -orum, -is, -is. La terminaison -a au pluriel, c'est pour les neutres (templa).",
+ comp:"Un composé de sum = préfixe + forme de sum. de + es = dees (deux e). prae + sumus = praesumus. Devant une voyelle, pro devient prod : prodes, prodest.",
+ cum:"cum (avec) et in (dans, lieu où l'on est) sont toujours suivis de l'ablatif. -is au pluriel peut être datif OU ablatif : c'est cum ou in qui décide.",
+ praeesse:"praeesse (être à la tête de, diriger) se construit avec le DATIF : magister discipulis praeest = le maître dirige les élèves. Attention : prodest = il est utile.",
+ nombre:"Regarde la fin du mot : -i (nominatif pluriel), -os (accusatif pluriel), -is (datif ou ablatif pluriel). Un mot au pluriel se traduit au pluriel : les enfants, les maîtres, les dieux.",
+ methode:"Méthode : 1. le verbe. 2. le sujet au nominatif. 3. les autres mots : cas, nombre, et qui impose le cas. 4. on traduit.",
+ theme:"Pour écrire en latin : 1. la fonction en français (sujet, COD, complément du nom…). 2. le cas qui va avec. 3. la bonne terminaison."
+};
+
+/* aide pour fabriquer une table à forger dans l'ordre du cahier */
+function forgeTable(tab,num,which,hint){const T=TABLES[tab],L=num==="sg"?T.sg:T.pl;
+ return (which||[0,1,2,3,4,5]).map(i=>({k:"form",p:`<b>${T.title.split(" :")[0]}</b> · ${CASES[ORDER[i]]} ${num==="sg"?"singulier":"pluriel"} ?`,a:[L[i]],place:{tab,num,i},hint,rule:hint}));}
+
+const CREEPERS=[
+ /* ---------- Exercice 1 : la Plaine des cas ---------- */
+ {id:"c1",ex:1,pts:0.5,name:"Le creeper du nominatif",q:"Donne la fonction du nominatif.",his:"COD",exp:"sujet ou attribut du sujet",notion:"Cas et fonction",
+  ctx:"table-cas",
+  steps:[
+   {k:"sens",p:"Pourquoi « COD » est faux ? Dis à quoi sert le nominatif, et quel cas sert au COD.",g:[["sujet"],["accusatif","acc"]],crit:[0,1],hint:"Pense à la phrase du cahier : Domina puellae rosam dat. Domina est au nominatif : c'est qui fait l'action. Et rosam ?",rule:RULE.casfonc},
+   {k:"sens",p:"Écris la fonction du nominatif, comme dans ton cahier.",g:[["sujet"],["attribut"]],crit:[0,1],hint:"Deux fonctions : le … et l'… du sujet.",rule:RULE.casfonc},
+   {k:"sens",p:"Jumelle 1 · Le génitif, c'est quelle fonction ?",g:[["complement du nom","cdn"]],crit:[0],hint:"rosae dans « la couleur de la rose ».",rule:RULE.casfonc,twin:1},
+   {k:"sens",p:"Jumelle 2 · Le vocatif, c'est quelle fonction ?",g:[["apostrophe"]],crit:[0],hint:"Quand on appelle quelqu'un : « Domine ! »",rule:RULE.casfonc,twin:1},
+   {k:"sens",p:"Jumelle 3 · L'ablatif, c'est quelle fonction ?",g:[["complement circonstanciel","cc","circonstanciel"]],crit:[0],hint:"Où ? avec qui ? comment ?",rule:RULE.casfonc,twin:1}]},
+ {id:"c2",ex:1,pts:0.75,name:"Le creeper de puer (singulier)",q:"Décline puer, pueri, m au singulier.",his:"puerif · puerif · puerul",exp:"puer · puer · puerum",notion:"Noms en -er",
+  ctx:"forge",tab:"puer",
+  steps:[
+   {k:"sens",p:"Pourquoi « puerif » est faux ? Qu'est-ce que puer a de spécial ?",g:[["er","-er","pas de us","sans us","garde le e","garde","nominatif est puer"],["genitif","pueri","radical"]],crit:[0],need:1,hint:"Regarde la carte d'identité : puer, pueri. Le nominatif finit-il en -us comme dominus ?",rule:RULE.er},
+   ...forgeTable("puer","sg",null,RULE.er),
+   {k:"form",p:"Jumelle 1 · <b>ager, agri, m</b> (le champ) · nominatif singulier ?",a:["ager"],hint:RULE.ager,twin:1},
+   {k:"form",p:"Jumelle 1 · <b>ager, agri</b> · accusatif singulier ?",a:["agrum"],hint:RULE.ager,twin:1},
+   {k:"form",p:"Jumelle 2 · <b>magister, magistri, m</b> · vocatif singulier ?",a:["magister"],hint:"Comme puer et ager : au vocatif singulier, on garde magister.",twin:1},
+   {k:"form",p:"Jumelle 2 · <b>magister, magistri</b> · accusatif singulier ?",a:["magistrum"],hint:"Radical sur le génitif : magistri → magistr-.",twin:1},
+   {k:"form",p:"Jumelle 3 · Vocatif singulier de <b>dominus</b> ? (attention, ce n'est pas un nom en -er)",a:["domine"],hint:"dominus fait -e au vocatif. puer, ager, magister gardent leur forme.",twin:1}]},
+ {id:"c3",ex:1,pts:1,name:"Le creeper de puer (pluriel)",q:"Décline puer, pueri, m au pluriel.",his:"puera · puera · puera · puerorum barré",exp:"pueri · pueri · pueros · puerorum",notion:"2e déclinaison au pluriel",
+  ctx:"forge",tab:"puer",
+  steps:[
+   {k:"sens",p:"Pourquoi « puera » est faux ? (indice : à quel mot ressemble ce pluriel ?)",g:[["masculin","dominus","domini"],["neutre","templa","templum"]],crit:[],need:1,hint:"puer est masculin comme dominus. Les pluriels en -a sont ceux des neutres, comme templa.",rule:RULE.masc},
+   ...forgeTable("puer","pl",null,RULE.masc),
+   {k:"form",p:"Jumelle 1 · <b>ager, agri, m</b> · nominatif pluriel ?",a:["agri"],hint:RULE.ager,twin:1},
+   {k:"form",p:"Jumelle 1 · <b>ager</b> · génitif pluriel ?",a:["agrorum"],hint:"Génitif pluriel masculin : -orum.",twin:1},
+   {k:"form",p:"Jumelle 2 · <b>servus, i, m</b> · accusatif pluriel ?",a:["servos"],hint:"Accusatif pluriel masculin : -os.",twin:1},
+   {k:"form",p:"Jumelle 3 · <b>magister, magistri</b> · nominatif pluriel ?",a:["magistri"],hint:"Comme pueri, agri : -i.",twin:1}]},
+ /* ---------- Exercice 2 : la Grotte de sum ---------- */
+ {id:"c5",ex:2,pts:0.25,name:"Le creeper de desum",q:"Traduis : tu manques.",his:"tu manques : barré",exp:"tu manques = dees",notion:"Composés de sum",
+  ctx:"forge-conj",steps:[
+   {k:"sens",p:"Comment fabrique-t-on « tu manques » ? Avec quel préfixe et quelle forme de sum ?",g:[["de","desum"],["es","tu es"]],crit:[0,1],hint:"desum = de + sum. « tu es » se dit es.",rule:RULE.comp},
+   {k:"form",p:"Forge : <b>tu manques</b>",a:["dees"],hint:"de + es (on garde les deux e).",rule:RULE.comp},
+   {k:"form",p:"Jumelle 1 · <b>il manque</b>",a:["deest"],hint:"de + est.",twin:1},
+   {k:"form",p:"Jumelle 2 · <b>vous manquez</b>",a:["deestis"],hint:"de + estis.",twin:1},
+   {k:"form",p:"Jumelle 3 · <b>ils manquent</b>",a:["desunt"],hint:"de + sunt.",twin:1}]},
+ {id:"c6",ex:2,pts:0.25,name:"Le creeper de praesum",q:"Traduis : nous commandons.",his:"nous commandons : faux",exp:"nous commandons = praesumus",notion:"Composés de sum",
+  ctx:"forge-conj",steps:[
+   {k:"sens",p:"praesum : comment est-il fabriqué, et que veut-il dire ?",g:[["prae"],["sum","etre"],["commande","dirige","tete"]],crit:[0],need:2,hint:"prae + sum. Il veut dire « je commande », « je suis à la tête de ».",rule:RULE.comp},
+   {k:"form",p:"Forge : <b>nous commandons</b>",a:["praesumus"],hint:"prae + sumus.",rule:RULE.comp},
+   {k:"form",p:"Jumelle 1 · <b>il dirige</b>",a:["praeest"],hint:"prae + est.",twin:1},
+   {k:"form",p:"Jumelle 2 · <b>ils sont à la tête de</b>",a:["praesunt"],hint:"prae + sunt.",twin:1},
+   {k:"form",p:"Jumelle 3 · <b>tu es utile</b> (prosum)",a:["prodes"],hint:"Devant une voyelle, pro devient prod : prod + es.",twin:1}]},
+ /* ---------- Exercice 3 : le Chantier de la villa ---------- */
+ {id:"c7",ex:3,pts:1.75,name:"Le creeper de cum",q:"Analyse et traduis : Enim pueri cum dominis et deis sunt.",his:"dominis = datif, deis = accusatif · « en effet l'enfant avec le maître et son déesse »",exp:"En effet, les enfants sont avec les maîtres et les dieux.",notion:"cum + ablatif, pluriel",
+  ctx:"chantier",words:["Enim","pueri","cum","dominis","et","deis","sunt"],
+  steps:[
+   {k:"form",p:"1. Le verbe d'abord. Écris le verbe de la phrase.",a:["sunt"],w:6,role:"verbe",hint:"Le verbe est conjugué : c'est une forme de sum.",rule:RULE.methode},
+   {k:"sens",p:"Traduis ce verbe.",g:[["sont","ils sont"]],crit:[0],w:6,hint:"sunt = ils sont.",rule:"sum, es, est, sumus, estis, sunt."},
+   {k:"form",p:"2. Le sujet : quel mot est au nominatif ?",a:["pueri"],w:1,role:"sujet",hint:"Qui « sont » ? Un mot en -i qui peut être nominatif pluriel.",rule:RULE.methode},
+   {k:"cas",p:"<b>pueri</b> : quel cas et quel nombre ?",cas:["nom","pl"],w:1,hint:"sunt est au pluriel : le sujet aussi.",rule:RULE.nombre},
+   {k:"cas",p:"<b>dominis</b> : quel cas et quel nombre ?",cas:["abl","pl"],w:3,hint:"-is = datif OU ablatif pluriel. Regarde le mot juste avant.",rule:RULE.cum},
+   {k:"sens",p:"Pourquoi l'ablatif pour <b>dominis</b> et <b>deis</b> ?",g:[["cum","avec"]],crit:[0],w:3,hint:"Quel petit mot est devant ?",rule:RULE.cum},
+   {k:"cas",p:"<b>deis</b> : quel cas et quel nombre ?",cas:["abl","pl"],w:5,hint:"Il est relié à dominis par et : même cas.",rule:RULE.cum},
+   {k:"sens",p:"3. Traduis toute la phrase.",tr:1,g:[["en effet","car"],["enfants!"],["sont"],["avec"],["maitres!"],["dieux!"]],crit:[1,4,5],forbid:["l enfant","le maitre","deesse","son"],hint:"Tout est au pluriel : les enfants, les maîtres, les dieux.",rule:RULE.nombre},
+   {k:"cas",p:"Jumelle · <b>Servi cum dominis in villa sunt.</b> <br><b>villa</b> : quel cas et quel nombre ?",cas:["abl","sg"],twin:1,ws:["Servi","cum","dominis","in","villa","sunt"],w:4,hint:"in + ablatif.",rule:RULE.cum},
+   {k:"sens",p:"Jumelle · Traduis : <b>Servi cum dominis in villa sunt.</b>",tr:1,twin:1,ws:["Servi","cum","dominis","in","villa","sunt"],exp:"Les esclaves sont dans la maison avec les maîtres.",g:[["esclaves!"],["sont"],["avec"],["maitres!"],["dans"],["maison","villa"]],crit:[0,3],forbid:["l esclave","le maitre"],hint:"Les esclaves… avec les maîtres…",rule:RULE.nombre}]},
+ {id:"c8",ex:3,pts:1.25,name:"Le creeper des amis",q:"Analyse et traduis : Amici adsunt, sed dominus abest.",his:"amici mal analysé · « l'ami est présent mais le maître est absent »",exp:"Les amis sont présents, mais le maître est absent.",notion:"Lire le pluriel",
+  ctx:"chantier",words:["Amici","adsunt,","sed","dominus","abest."],
+  steps:[
+   {k:"form",p:"1. Il y a deux verbes. Écris le premier.",a:["adsunt"],w:1,role:"verbe",hint:"Une forme de adsum.",rule:RULE.methode},
+   {k:"sens",p:"Traduis <b>adsunt</b>.",g:[["sont presents","sont la"]],crit:[0],w:1,hint:"adsum = je suis présent. -sunt = ils.",rule:RULE.comp},
+   {k:"cas",p:"<b>Amici</b> est le sujet de adsunt : quel cas et quel nombre ?",cas:["nom","pl"],w:0,hint:"adsunt est au pluriel. -i = nominatif pluriel.",rule:RULE.nombre},
+   {k:"sens",p:"Traduis <b>abest</b>.",g:[["est absent"]],crit:[0],w:4,hint:"absum = je suis absent. est = il.",rule:RULE.comp},
+   {k:"cas",p:"<b>dominus</b> : quel cas et quel nombre ?",cas:["nom","sg"],w:3,hint:"-us : nominatif singulier, sujet de abest.",rule:RULE.casfonc},
+   {k:"sens",p:"Traduis toute la phrase.",tr:1,g:[["amis!"],["sont presents","sont la"],["mais"],["maitre"],["est absent"]],crit:[0,1],forbid:["l ami","est present"],hint:"Amici et adsunt sont au pluriel.",rule:RULE.nombre},
+   {k:"sens",p:"Jumelle · Traduis : <b>Discipuli adsunt, sed magister abest.</b>",tr:1,twin:1,ws:["Discipuli","adsunt,","sed","magister","abest."],exp:"Les élèves sont présents, mais le maître est absent.",g:[["eleves!"],["sont presents","sont la"],["mais"],["maitre"],["est absent"]],crit:[0,1],forbid:["l eleve"],hint:"Discipuli : nominatif pluriel.",rule:RULE.nombre}]},
+ {id:"c9",ex:3,pts:1.75,name:"Le creeper de la villa",q:"Analyse et traduis : Servus in villa cum equis adest.",his:"villa = accusatif, equis = datif · « avec son cheval »",exp:"L'esclave est présent dans la maison avec les chevaux.",notion:"in / cum + ablatif",
+  ctx:"chantier",words:["Servus","in","villa","cum","equis","adest."],
+  steps:[
+   {k:"form",p:"1. Écris le verbe.",a:["adest"],w:5,role:"verbe",hint:"Une forme de adsum.",rule:RULE.methode},
+   {k:"form",p:"2. Écris le sujet (au nominatif).",a:["servus"],w:0,role:"sujet",hint:"-us : nominatif singulier.",rule:RULE.methode},
+   {k:"cas",p:"<b>villa</b> : quel cas et quel nombre ?",cas:["abl","sg"],w:2,hint:"villa peut être nominatif ou ablatif. Regarde le mot devant.",rule:RULE.cum},
+   {k:"sens",p:"Pourquoi l'ablatif pour <b>villa</b> ?",g:[["in","dans"]],crit:[0],w:2,hint:"Quel petit mot est devant ?",rule:RULE.cum},
+   {k:"cas",p:"<b>equis</b> : quel cas et quel nombre ?",cas:["abl","pl"],w:4,hint:"-is : datif ou ablatif pluriel. Mot devant : cum.",rule:RULE.cum},
+   {k:"sens",p:"3. Traduis toute la phrase.",tr:1,g:[["esclave"],["est present","est la"],["dans"],["maison","villa"],["avec"],["chevaux!"]],crit:[0,5],forbid:["son cheval","le cheval"],hint:"equis est au pluriel : les chevaux.",rule:RULE.nombre},
+   {k:"sens",p:"Jumelle · Traduis : <b>Dominus in horto cum servis adest.</b>",tr:1,twin:1,ws:["Dominus","in","horto","cum","servis","adest."],exp:"Le maître est présent dans le jardin avec les esclaves.",g:[["maitre"],["est present","est la"],["dans"],["jardin"],["avec"],["esclaves!"]],crit:[0,3,5],forbid:["l esclave","son esclave"],hint:"servis : ablatif pluriel après cum.",rule:RULE.cum}]},
+ {id:"c10",ex:3,pts:1.5,name:"Le creeper de praeesse",q:"Analyse et traduis : Statim magister discipulis praeest.",his:"magister et discipulis mal analysés · « le maître d'école est utile aux élèves »",exp:"Aussitôt, le maître dirige les élèves.",notion:"praeesse + datif",
+  ctx:"chantier",words:["Statim","magister","discipulis","praeest."],
+  steps:[
+   {k:"form",p:"1. Écris le verbe.",a:["praeest"],w:3,role:"verbe",hint:"prae + est.",rule:RULE.methode},
+   {k:"sens",p:"Traduis <b>praeest</b>. (Ce n'est pas « il est utile » : ça, c'est prodest.)",g:[["dirige","commande","est a la tete"]],crit:[0],w:3,hint:"praesum = je commande, je suis à la tête de.",rule:RULE.praeesse},
+   {k:"cas",p:"<b>magister</b> : quel cas et quel nombre ?",cas:["nom","sg"],w:1,hint:"Comme puer : magister est le nominatif singulier. C'est le sujet.",rule:RULE.er},
+   {k:"cas",p:"<b>discipulis</b> : quel cas et quel nombre ?",cas:["dat","pl"],w:2,hint:"Pas de cum ni de in ici. C'est le verbe praeesse qui impose son cas.",rule:RULE.praeesse},
+   {k:"sens",p:"Pourquoi le datif pour <b>discipulis</b> ?",g:[["praeest","praeesse","praesum","verbe"]],crit:[0],w:2,hint:"Qui impose le datif ?",rule:RULE.praeesse},
+   {k:"sens",p:"3. Traduis toute la phrase.",tr:1,g:[["aussitot","immediatement","tout de suite"],["maitre"],["dirige","commande","est a la tete"],["eleves!"]],crit:[0,1,2,3],forbid:["utile"],hint:"Statim = aussitôt. discipulis est au pluriel.",rule:RULE.praeesse},
+   {k:"sens",p:"Jumelle · Traduis : <b>Dominus servis praeest.</b>",tr:1,twin:1,ws:["Dominus","servis","praeest."],exp:"Le maître dirige les esclaves.",g:[["maitre"],["dirige","commande","est a la tete"],["esclaves!"]],crit:[0,1,2],forbid:["utile"],hint:"servis : datif pluriel avec praeesse.",rule:RULE.praeesse}]},
+ /* ---------- Exercice 4 : la Tour du thème ---------- */
+ {id:"c11",ex:4,pts:0.5,name:"Le creeper du jardin",q:"Traduis : Je peux aller dans le jardin avec les enfants.",his:"Possum ire in hortum cum pueris",exp:"Possum ire in horto cum pueris (règle du cours : in + ablatif)",notion:"in + ablatif",
+  ctx:"theme",fr:["Je peux","aller","dans le jardin","avec les enfants"],la:["Possum","ire","in horto","cum pueris"],bad:{2:"in hortum"},
+  steps:[
+   {k:"sens",p:"Dans ta copie : « in hortum ». Ton cours dit : in + quel cas ?",g:[["ablatif","abl"]],crit:[0],hint:"Regarde le mémo du sujet : in + abl = dans.",rule:RULE.cum},
+   {k:"form",p:"Forge : <b>dans le jardin</b>",a:["in horto","horto"],slot:2,hint:"hortus, i, m : ablatif singulier en -o.",rule:RULE.cum},
+   {k:"form",p:"Jumelle 1 · <b>dans la maison</b>",a:["in villa","villa"],hint:"villa, ae, f : ablatif singulier = villa.",twin:1},
+   {k:"form",p:"Jumelle 2 · <b>dans le champ</b>",a:["in agro","agro"],hint:"ager, agri : ablatif singulier = agro.",twin:1},
+   {k:"form",p:"Jumelle 3 · <b>dans les jardins</b>",a:["in hortis","hortis"],hint:"Ablatif pluriel : -is.",twin:1}]},
+ {id:"c12",ex:4,pts:1.5,name:"Le creeper du thème",q:"Traduis : Les esclaves peuvent toujours vivre dans la maison du maître.",his:"Servo possunt sempe vivo in dominus villa",exp:"Servi possunt semper vivere in domini villa.",notion:"Fonction → cas → terminaison",
+  ctx:"theme",fr:["Les esclaves","peuvent","toujours","vivre","dans la maison","du maître"],la:["Servi","possunt","semper","vivere","in villa","domini"],bad:{0:"Servo",2:"sempe",3:"vivo",5:"dominus"},
+  steps:[
+   {k:"sens",p:"Méthode du thème : dis comment on trouve la bonne terminaison.",g:[["fonction"],["cas"],["terminaison"]],crit:[1],need:2,hint:"D'abord la fonction en français, puis le cas, puis la terminaison.",rule:RULE.theme},
+   {k:"cas",p:"« <b>Les esclaves</b> » est le sujet de « peuvent ». Quel cas et quel nombre ?",cas:["nom","pl"],slot:0,hint:"Sujet = nominatif. Les esclaves = pluriel.",rule:RULE.casfonc},
+   {k:"form",p:"Forge : <b>les esclaves</b> (sujet)",a:["servi"],slot:0,hint:"servus au nominatif pluriel : -i.",rule:RULE.theme},
+   {k:"form",p:"Forge : <b>toujours</b>",a:["semper"],slot:2,hint:"Le mot du vocabulaire finit par -per.",rule:"semper = toujours."},
+   {k:"sens",p:"« peuvent <b>vivre</b> » : après possum, le 2e verbe est à quel mode ?",g:[["infinitif"]],crit:[0],hint:"Comme en français : ils peuvent VIVRE.",rule:"possum + infinitif : possunt vivere. vivo, is, ere : l'infinitif est vivere."},
+   {k:"form",p:"Forge : <b>vivre</b>",a:["vivere"],slot:3,hint:"vivo, is, ere : l'infinitif finit par -ere.",rule:"vivo, is, ere → vivere."},
+   {k:"cas",p:"« la maison <b>du maître</b> » : c'est un complément du nom. Quel cas et quel nombre ?",cas:["gen","sg"],slot:5,hint:"Complément du nom = génitif.",rule:RULE.casfonc},
+   {k:"form",p:"Forge : <b>du maître</b>",a:["domini"],slot:5,hint:"dominus au génitif singulier : -i.",rule:RULE.theme},
+   {k:"form",p:"Jumelle 1 · <b>Les enfants</b> (sujet)",a:["pueri"],twin:1,hint:"Nominatif pluriel de puer."},
+   {k:"form",p:"Jumelle 2 · <b>du maître d'école</b> (complément du nom)",a:["magistri"],twin:1,hint:"Génitif singulier de magister."},
+   {k:"form",p:"Jumelle 3 · <b>ils peuvent aller</b>",a:["possunt ire"],twin:1,hint:"possunt + infinitif ire."}]}
+];
+const EXN={1:{name:"Exercice 1 · La Plaine des cas",note:"1,75 / 4"},2:{name:"Exercice 2 · La Grotte de sum",note:"3,5 / 4"},3:{name:"Exercice 3 · Le Chantier de la villa",note:"1,75 / 8"},4:{name:"Exercice 4 · La Tour du thème",note:"2 / 4"}};
+
+/* ================= BOSS : un DT bis tout neuf (20 points), tiré au sort ================= */
+const BOSS_POOL={
+ casfonc:[["accusatif","COD",[["cod","complement d objet direct"]]],["génitif","complément du nom",[["complement du nom","cdn"]]],["datif","COI",[["coi","complement d objet indirect"]]],["ablatif","complément circonstanciel",[["circonstanciel","cc"]]],["nominatif","sujet ou attribut du sujet",[["sujet"]]],["vocatif","apostrophe",[["apostrophe"]]]],
+ decl:["ager","dominus","puer"],
+ ident:[["pueros",[["acc","pl"]]],["rosae",[["gen","sg"],["dat","sg"],["nom","pl"],["voc","pl"]]],["agris",[["dat","pl"],["abl","pl"]]],["domine",[["voc","sg"]]],["templa",[["nom","pl"],["voc","pl"],["acc","pl"]]],["servorum",[["gen","pl"]]]],
+ conj:[["vous manquez","deestis"],["il est à la tête de","praeest"],["je peux","possum"],["ils sont absents","absunt"],["tu es utile","prodes"],["nous sommes présents","adsumus"],["ils peuvent","possunt"],["tu manques","dees"],["il est utile","prodest"],["vous pouvez","potestis"],["nous commandons","praesumus"],["il manque","deest"]],
+ phr:[
+  {la:"Pueri cum servis in horto sunt.",an:[["servis",["abl","pl"]],["horto",["abl","sg"]]],g:[["enfants!"],["sont"],["avec"],["esclaves!"],["dans"],["jardin"]],crit:[0,3],forbid:["l enfant","l esclave"],fr:"Les enfants sont dans le jardin avec les esclaves."},
+  {la:"Magistri discipulis prosunt.",an:[["Magistri",["nom","pl"]],["discipulis",["dat","pl"]]],g:[["maitres!"],["sont utiles"],["eleves!"]],crit:[0,1,2],forbid:["dirige"],fr:"Les maîtres sont utiles aux élèves."},
+  {la:"Domini absunt, sed servi adsunt.",an:[["Domini",["nom","pl"]],["servi",["nom","pl"]]],g:[["maitres!"],["sont absents"],["mais"],["esclaves!"],["sont presents","sont la"]],crit:[0,1,3,4],forbid:["le maitre","l esclave"],fr:"Les maîtres sont absents, mais les esclaves sont présents."},
+  {la:"Statim dominus servis praeest.",an:[["dominus",["nom","sg"]],["servis",["dat","pl"]]],g:[["aussitot","immediatement","tout de suite"],["maitre"],["dirige","commande","est a la tete"],["esclaves!"]],crit:[1,2,3],forbid:["utile"],fr:"Aussitôt, le maître dirige les esclaves."},
+  {la:"Enim amici in villa cum pueris sunt.",an:[["villa",["abl","sg"]],["pueris",["abl","pl"]]],g:[["en effet","car"],["amis!"],["sont"],["dans"],["maison","villa"],["avec"],["enfants!"]],crit:[1,6],forbid:["l ami","l enfant"],fr:"En effet, les amis sont dans la maison avec les enfants."},
+  {la:"Discipuli cum magistro adsunt.",an:[["Discipuli",["nom","pl"]],["magistro",["abl","sg"]]],g:[["eleves!"],["sont presents","sont la"],["avec"],["maitre"]],crit:[0,1,3],forbid:["l eleve"],fr:"Les élèves sont présents avec le maître."}],
+ theme:[
+  {fr:"Les élèves peuvent vivre dans le jardin.",parts:[["Les élèves (sujet)","discipuli"],["peuvent","possunt"],["vivre","vivere"],["dans le jardin","in horto"]]},
+  {fr:"L'esclave est dans la maison du maître.",parts:[["L'esclave (sujet)","servus"],["est","est"],["dans la maison","in villa"],["du maître","domini"]]},
+  {fr:"Les enfants peuvent toujours aller avec les chevaux.",parts:[["Les enfants (sujet)","pueri"],["peuvent","possunt"],["toujours","semper"],["aller","ire"],["avec les chevaux","cum equis"]]},
+  {fr:"Le maître d'école dirige les élèves.",parts:[["Le maître d'école (sujet)","magister"],["les élèves (datif avec praeesse)","discipulis"],["dirige","praeest"]]}]
+};
+
+/* ================= VOIX : réciter au micro, et « Papa écoute » (partagé entre les jeux) =================
+   Micro : chaque morceau reconnu est AJOUTÉ à la réponse (jamais tout remplacé). Chaque mot est une
+   pastille : on la touche pour le corriger ou l'effacer. Après la vérification, on dit seulement
+   quelle partie redire, et on la redit seule : elle est remise à sa place.
+   Papa écoute : le texte est caché, l'enfant récite, papa répond à une multiplication puis note. */
+const VOIX={bars:{},pending:null,denied:false,cur:null,
+ SR(){return window.SpeechRecognition||window.webkitSpeechRecognition||null;},
+ esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));},
+ attach(id,o){
+  const B={id,o,field:o.field,res:null,redoPi:null,buf:"",last:null,editI:-1};this.bars[id]=B;
+  const el=document.createElement("div");el.className="vx";el.id="vx-"+id;
+  el.innerHTML=`<div class="vxrow"><button type="button" class="vxb vxmic">🎤 Dicter</button><button type="button" class="vxb vxpapa">👂 Papa écoute</button><span class="vxst"></span></div>
+   <div class="vxlive"></div><div class="vxchips"></div>
+   <div class="vxedit vxhide"><input class="vxein" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><button type="button" class="vxb vxeok">✔ Garder</button><button type="button" class="vxb vxedel">🗑 Effacer</button></div>
+   <div class="vxredo vxhide"><div class="vxrt"></div><button type="button" class="vxb vxrmic">🎤 Redire cette partie</button><button type="button" class="vxb vxrkb">⌨️ Taper cette partie</button>
+    <span class="vxrkbox vxhide"><input class="vxrin" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Tape seulement cette partie"><button type="button" class="vxb vxrok">✔ Remettre à sa place</button></span></div>`;
+  (o.anchor||o.field).insertAdjacentElement("afterend",el);B.el=el;const q=s=>el.querySelector(s);B.q=q;
+  const nb=e=>e.addEventListener("pointerdown",ev=>ev.preventDefault());
+  el.querySelectorAll("button").forEach(nb);
+  q(".vxmic").onclick=()=>this.toggle(B,"main");
+  q(".vxpapa").onclick=()=>this.papaOpen(B);
+  q(".vxrmic").onclick=()=>this.toggle(B,"redo");
+  q(".vxrkb").onclick=()=>{q(".vxrkbox").classList.remove("vxhide");q(".vxrin").value="";q(".vxrin").focus();};
+  q(".vxrok").onclick=()=>{const t=q(".vxrin").value.trim();if(t)this.redoDone(B,t);};
+  q(".vxrin").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();q(".vxrok").click();}});
+  q(".vxeok").onclick=()=>this.editSave(B,false);q(".vxedel").onclick=()=>this.editSave(B,true);
+  q(".vxein").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();this.editSave(B,false);}});
+  B.field.addEventListener("input",()=>this.chips(B));
+  if(!this.SR()||this.denied)q(".vxmic").classList.add("vxhide"),q(".vxrmic").classList.add("vxhide");
+  setInterval(()=>this.tick(B),400);this.tick(B);return B;},
+ tick(B){const vis=!!(B.field.offsetParent||B.field.getClientRects().length);B.q(".vxrow").classList.toggle("vxhide",!vis);
+  B.q(".vxpapa").classList.toggle("vxhide",!(B.o.papaOK?B.o.papaOK():true));
+  if(!vis){B.q(".vxchips").classList.add("vxhide");B.q(".vxedit").classList.add("vxhide");if(this.cur===B&&B.mode==="main")this.stop(B);}
+  else B.q(".vxchips").classList.remove("vxhide");
+  if(B.field.value!==B.last)this.chips(B);},
+ words(B){return B.field.value.split(/\s+/).filter(Boolean);},
+ chips(B){B.last=B.field.value;const W=this.words(B);const c=B.q(".vxchips");
+  c.innerHTML=W.length&&(this.cur===B||B.used)?W.map((w,i)=>`<button type="button" class="vxchip${i===B.editI?" on":""}" data-i="${i}">${this.esc(w)}</button>`).join(""):"";
+  c.querySelectorAll(".vxchip").forEach(b=>{b.addEventListener("pointerdown",e=>e.preventDefault());b.onclick=()=>{B.editI=+b.dataset.i;const ed=B.q(".vxedit");ed.classList.remove("vxhide");const inp=B.q(".vxein");inp.value=this.words(B)[B.editI]||"";this.chips(B);inp.focus();try{inp.select()}catch(_){}};});},
+ editSave(B,del){const W=this.words(B),i=B.editI;if(i<0||i>=W.length)return;const v=B.q(".vxein").value.trim();
+  if(del||!v)W.splice(i,1);else W.splice(i,1,...v.split(/\s+/));B.field.value=W.join(" ");B.editI=-1;B.q(".vxedit").classList.add("vxhide");this.chips(B);this.say(B,del?"Mot effacé.":"Mot corrigé.");},
+ say(B,t,cls){const s=B.q(".vxst");s.textContent=t||"";s.className="vxst"+(cls?" "+cls:"");},
+ audio(){try{if(typeof IOSAU!=="undefined"){IOSAU.session();IOSAU.resume();}}catch(e){}},
+ unavailable(B,denied){if(denied)this.denied=true;Object.values(this.bars).forEach(x=>{x.q(".vxmic").classList.add("vxhide");x.q(".vxrmic").classList.add("vxhide");});
+  this.say(B,denied?"Le micro est refusé. Tu peux taper ta réponse, ou autoriser le micro dans les réglages.":"Le micro n'est pas disponible ici. Tu peux taper ta réponse.","vxwarn");},
+ toggle(B,mode){if(this.cur===B){this.stop(B);return;}this.start(B,mode);},
+ start(B,mode){const SR=this.SR();if(!SR||this.denied){this.unavailable(B,this.denied);return;}
+  if(this.cur)this.stop(this.cur);B.mode=mode;B.used=true;B.buf="";this.cur=B;B.on=true;
+  let r;try{r=new SR();}catch(e){this.unavailable(B,false);return;}B.rec=r;
+  r.lang="fr-FR";r.interimResults=true;r.continuous=true;r.maxAlternatives=1;
+  r.onresult=e=>{let interim="";for(let i=e.resultIndex;i<e.results.length;i++){const x=e.results[i];if(x.isFinal)this.chunk(B,x[0].transcript);else interim+=x[0].transcript;}
+   B.q(".vxlive").textContent=interim?"… "+interim:"";};
+  r.onerror=e=>{const er=e&&e.error;if(er==="not-allowed"||er==="service-not-allowed"||er==="audio-capture"){B.on=false;this.unavailable(B,er!=="audio-capture");}};
+  r.onend=()=>{this.audio();if(B.on&&this.cur===B){setTimeout(()=>{if(B.on&&this.cur===B){try{r.start();}catch(_){}}},250);return;}this.ended(B);};
+  try{r.start();}catch(e){this.unavailable(B,false);return;}
+  const btn=B.q(mode==="redo"?".vxrmic":".vxmic");btn.classList.add("rec");btn.textContent="⏹ J'ai fini";
+  this.say(B,mode==="redo"?"Je t'écoute. Redis seulement cette partie.":"Je t'écoute. Récite phrase par phrase, je recopie à la suite.","vxon");this.chips(B);},
+ stop(B){B.on=false;try{B.rec&&B.rec.stop();}catch(e){}if(!B.rec)this.ended(B);setTimeout(()=>{if(this.cur===B)this.ended(B);},900);},
+ ended(B){if(this.cur!==B)return;this.cur=null;this.audio();B.q(".vxlive").textContent="";
+  B.q(".vxmic").classList.remove("rec");B.q(".vxmic").textContent="🎤 Dicter";B.q(".vxrmic").classList.remove("rec");B.q(".vxrmic").textContent="🎤 Redire cette partie";
+  if(B.mode==="redo"){const t=B.buf.trim();B.buf="";if(t)this.redoDone(B,t);else this.say(B,"Je n'ai rien entendu. Réessaie.");}
+  else if(!this.denied)this.say(B,B.field.value.trim()?"Vérifie les mots. Touche un mot pour le corriger.":"");this.chips(B);},
+ chunk(B,txt){const t=(typeof dictNorm==="function"?dictNorm(txt):txt).trim();if(!t)return;
+  if(B.mode==="redo"){B.buf=(B.buf+" "+t).trim();B.q(".vxlive").textContent="";this.say(B,"Partie redite : « "+B.buf+" »","vxon");return;}
+  B.field.value=(B.field.value.replace(/\s+$/,"")+" "+t).trim();B.field.dispatchEvent(new Event("input",{bubbles:true}));this.chips(B);},
+ /* après la vérification du jeu */
+ after(id,res){const B=this.bars[id];if(!B)return;B.res=res;const box=B.q(".vxredo");B.q(".vxrkbox").classList.add("vxhide");
+  if(!res||res.ok||res.papa||res.redo==null||typeof redoText!=="function"){box.classList.add("vxhide");return;}
+  const can=B.o.canRedo?B.o.canRedo(res):false;B.redoPi=res.redo;B.redoText=B.field.value;
+  B.q(".vxrt").textContent=can?redoText(res):"À revoir surtout : "+redoText(res).replace(/^Redis juste /,"").replace(/^Redis /,"");
+  box.classList.remove("vxhide");B.q(".vxrmic").classList.toggle("vxhide",!can||!this.SR()||this.denied);B.q(".vxrkb").classList.toggle("vxhide",!can);},
+ redoDone(B,t){const res=B.res;if(!res)return;const merged=(typeof mergeBest==="function")?mergeBest(res,B.redoPi,dictNorm(t)):(B.redoText+" "+t);
+  B.q(".vxredo").classList.add("vxhide");this.say(B,"Partie remise à sa place.","vxon");B.o.retry&&B.o.retry(merged);},
+ fig(f){return (typeof SCH!=="undefined"&&SCH.has(f))?`<div class="schslot vxsch">${SCH.box(f)}</div>`:"";},
+ take(){const p=this.pending;this.pending=null;return p;},
+ /* ---------- Papa écoute ---------- */
+ papaOpen(B){if(this.cur)this.stop(this.cur);const f=B.o.fiche();if(!f)return;B.o.pause&&B.o.pause();
+  let ov=document.getElementById("vxPapa");if(!ov){ov=document.createElement("div");ov.id="vxPapa";document.body.appendChild(ov);}
+  this.pp={B,f};ov.className="vxov on";this.papaStep(1);},
+ papaStep(n){const ov=document.getElementById("vxPapa"),{B,f}=this.pp,F=FICHES[f];
+  if(n===1)ov.innerHTML=`<div class="vxcard"><h3>👂 Papa écoute</h3><p>${this.fig(f)?"Récite la fiche à voix haute, sans regarder le texte. Tu peux regarder la figure.":"Récite la fiche à voix haute, sans regarder. Papa écoute."}</p><p class="vxtitle">Fiche ${f} : « ${this.esc(F.title)} »</p>${this.fig(f)}
+   <div class="vxbtns"><button type="button" class="vxb big" id="vxP1">✋ J'ai fini, je passe l'iPad à papa</button><button type="button" class="vxb" id="vxPx">Annuler</button></div></div>`;
+  if(n===2){const a=6+Math.floor(Math.random()*4),b=6+Math.floor(Math.random()*4);this.pp.ans=a*b;
+   ov.innerHTML=`<div class="vxcard"><h3>🔒 Pour papa</h3><p>Combien font ${a} × ${b} ?</p><input id="vxPin" inputmode="numeric" pattern="[0-9]*" autocomplete="off"><div class="vxbtns"><button type="button" class="vxb big" id="vxP2">Valider</button><button type="button" class="vxb" id="vxPx">Annuler</button></div><p class="vxst" id="vxPm"></p></div>`;}
+  if(n===3)ov.innerHTML=`<div class="vxcard"><h3>📜 Fiche ${f} : ${this.esc(F.title)}</h3>${this.fig(f)}<div class="vxfiche">${this.esc(F.txt).replace(/\{([^}]*)\}/g,'<span class="vxopt">$1</span>').replace(/ • /g,"<br>• ")}</div>
+   <p>Comment a-t-il récité ?</p><div class="vxbtns"><button type="button" class="vxb big vxg1" data-g="coeur">✅ Par cœur</button><button type="button" class="vxb big vxg2" data-g="presque">🟠 Presque</button><button type="button" class="vxb big vxg3" data-g="revoir">🔁 À revoir</button></div></div>`;
+  const x=document.getElementById("vxPx");if(x)x.onclick=()=>this.papaClose(null);
+  const p1=document.getElementById("vxP1");if(p1)p1.onclick=()=>this.papaStep(2);
+  const p2=document.getElementById("vxP2");if(p2){const go=()=>{const v=+document.getElementById("vxPin").value;if(v===this.pp.ans)this.papaStep(3);else{document.getElementById("vxPm").textContent="Ce n'est pas ça. Nouvelle question.";setTimeout(()=>this.papaStep(2),900);}};
+   p2.onclick=go;document.getElementById("vxPin").addEventListener("keydown",e=>{if(e.key==="Enter")go();});setTimeout(()=>{try{document.getElementById("vxPin").focus()}catch(_){}} ,60);}
+  ov.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>this.papaClose(b.dataset.g));},
+ papaClose(g){const ov=document.getElementById("vxPapa");ov.className="vxov";ov.innerHTML="";const {B,f}=this.pp;this.pp=null;B.o.resume&&B.o.resume();this.audio();
+  if(!g)return;this.pending=papaRes(f,g);B.q(".vxredo").classList.add("vxhide");B.o.papa(g,f);}
+};
+
+/* ================= LA COPIE HANTÉE : moteur ================= */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fr=x=>String(Math.round(x*100)/100).replace(".",",");
+const KEY="copieHantee.v1";
+let S=load();
+function load(){try{return Object.assign({done:{},boss:[],papa:{},mute:false,err:{}},JSON.parse(localStorage.getItem(KEY)||"{}"));}catch(e){return {done:{},boss:[],papa:{},mute:false,err:{}};}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),2200);}
+
+/* ---------- texte : normalisation, correspondance tolérante (même esprit que souple/moteur-sens) ---------- */
+const stripAcc=s=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+function norm(s){return stripAcc(String(s).toLowerCase()).replace(/œ/g,"oe").replace(/[’'‘`´\-–—_]/g," ").replace(/[«»"“”.,;:!?()\[\]…\/]/g," ").replace(/\s+/g," ").trim();}
+const toks=s=>norm(s).split(" ").filter(Boolean);
+function lev(a,b){if(Math.abs(a.length-b.length)>2)return 9;const m=a.length,n=b.length;let p=Array.from({length:n+1},(_,j)=>j);
+ for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n];}
+function phon(w){let s=String(w).replace(/[^a-z]/g,"");
+ s=s.replace(/ph/g,"f").replace(/qu/g,"k").replace(/c(?=[eiy])/g,"s").replace(/c/g,"k").replace(/h/g,"").replace(/y/g,"i").replace(/eau|au/g,"o").replace(/ai|ei/g,"e").replace(/(.)\1+/g,"$1");
+ for(let k=0;k<2;k++)s=s.replace(/(?:er|ez|et|es|ent|e|s|t|d|x)$/,"");return s;}
+function tokEq(u,r,exact){if(u===r)return true;if(exact)return false;
+ if(r.length>=4&&u.slice(0,2)===r.slice(0,2)&&lev(u,r)<=(r.length>=8?2:1))return true;
+ return r.length>=5&&phon(u)===phon(r);}
+function phraseIn(U,alt){const ex=alt.endsWith("!"),A=toks(alt.replace(/!$/,""));if(!A.length)return false;
+ for(let i=0;i+A.length<=U.length;i++){let ok=true;for(let j=0;j<A.length;j++)if(!tokEq(U[i+j],A[j],ex||A[j].length<4)){ok=false;break;}if(ok)return true;}return false;}
+function hasExact(U,ph){const A=toks(ph);for(let i=0;i+A.length<=U.length;i++){if(A.every((a,j)=>U[i+j]===a))return true;}return false;}
+/* sens : groupes d'idées. Les idées « crit » sont obligatoires, sinon il en faut au moins 85 %. Une contradiction fait échouer. */
+function checkSens(v,st){const U=toks(v);const n=st.g.length;const hit=st.g.map(g=>g.some(a=>phraseIn(U,a)));
+ const crit=st.crit||[];const need=st.need!=null?st.need:Math.max(1,Math.floor(n*0.85));const got=hit.filter(Boolean).length;
+ const forb=(st.forbid||[]).filter(f=>hasExact(U,f));const missCrit=crit.filter(i=>!hit[i]);
+ const ok=!forb.length&&!missCrit.length&&got>=need;
+ return {ok,hit,got,n,forb,missCrit,score:n?got/n:0,near:ok&&got<n};}
+function checkForm(v,st){const n=norm(v);const ok=st.a.some(a=>norm(a)===n);
+ const best=st.a.map(a=>lev(n,norm(a))).reduce((x,y)=>Math.min(x,y),9);return {ok,close:!ok&&best===1};}
+const CASE_RE=[["nom",/^nom(inatif|i|\.)?s?$/],["voc",/^voc(atif)?$/],["acc",/^acc(usatif)?$/],["gen",/^gen(itif)?$/],["dat",/^dat(if)?$/],["abl",/^abl(atif)?$/]];
+const NUM_RE=[["sg",/^(sg|sing|singulier|singul)$/],["pl",/^(pl|plur|pluriel|plu)$/]];
+function parseCas(v){const out=[];let pend=[];for(const t of toks(v)){const c=CASE_RE.find(([k,re])=>re.test(t));if(c){pend.push(c[0]);continue;}
+  const nn=NUM_RE.find(([k,re])=>re.test(t));if(nn){if(!pend.length&&out.length){out.push([out[out.length-1][0],nn[0]]);continue;}pend.forEach(c=>out.push([c,nn[0]]));pend=[];}}
+ pend.forEach(c=>out.push([c,null]));const seen=new Set();return out.filter(p=>{const k=p.join();if(seen.has(k))return false;seen.add(k);return true;});}
+function checkCas(v,want){/* want : [c,n] ou liste de [c,n] (toutes les possibilités) */
+ const W=Array.isArray(want[0])?want:[want];const P=parseCas(v);
+ const good=P.filter(p=>W.some(w=>w[0]===p[0]&&w[1]===p[1])).length,bad=P.length-good;
+ const ok=good===W.length&&bad===0;let why="";
+ if(!ok&&W.length===1&&P.length){const p=P[0],w=W[0];if(!p[1])why="Il manque le nombre : singulier ou pluriel ?";else if(p[0]===w[0])why="Le cas est bon. Regarde le nombre : la fin du mot.";else if(p[1]===w[1])why="Le nombre est bon. Le cas, non.";}
+ if(!P.length)why="Écris un cas (nominatif, vocatif, accusatif, génitif, datif, ablatif) et un nombre (singulier, pluriel).";
+ if(!ok&&W.length>1&&!why)why=good&&!bad?`Bien, mais il y a ${W.length} possibilités.`:"Toutes les possibilités, sans en inventer.";
+ return {ok,good,bad,n:W.length,why,score:bad?0:good/W.length};}
+
+/* ---------- sons (WebAudio, débloqués sur iPad par ios-audio.js) ---------- */
+let AC=null;function ac(create){if(!AC&&create){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}return AC;}
+function tone(f,d,type,vol,slide,delay){const c=ac(true);if(!c||S.mute)return;IOSAU.resume();const t=c.currentTime+(delay||0);const o=c.createOscillator(),g=c.createGain();
+ o.type=type||"square";o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+d);g.gain.setValueAtTime(vol||.25,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+d+.02);}
+function noise(d,vol,lp,delay){const c=ac(true);if(!c||S.mute)return;IOSAU.resume();const t=c.currentTime+(delay||0);const b=c.createBuffer(1,Math.floor(c.sampleRate*d),c.sampleRate),x=b.getChannelData(0);
+ for(let i=0;i<x.length;i++)x[i]=(Math.random()*2-1)*Math.pow(1-i/x.length,2);const s=c.createBufferSource();s.buffer=b;const f=c.createBiquadFilter();f.type="lowpass";f.frequency.value=lp||1800;const g=c.createGain();g.gain.value=vol||.6;
+ s.connect(f);f.connect(g);g.connect(c.destination);s.start(t);}
+const SND=IOSAU.instrument({
+ click(){tone(660,.05,"square",.12);},
+ anvil(){tone(1250,.18,"triangle",.35);tone(2500,.12,"sine",.15);noise(.06,.3,6000);},
+ ok(){tone(523,.09,"square",.2);tone(784,.14,"square",.2,null,.09);},
+ ko(){tone(220,.18,"sawtooth",.22,140);},
+ hiss(){noise(.6,.25,4000);},
+ boom(){noise(1.1,.95,900);tone(90,.6,"sine",.5,40);},
+ place(){tone(180,.06,"square",.25);noise(.05,.25,1200);},
+ level(){[523,659,784,1046].forEach((f,i)=>tone(f,.16,"square",.2,null,i*.1));},
+ portal(){tone(110,1.2,"sawtooth",.15,220);tone(165,1.2,"sine",.15,330);},
+ hurt(){tone(300,.12,"square",.2,120);noise(.1,.3,2500);}
+});
+IOSAU.setup(ac);
+
+/* ---------- dessins pixel ---------- */
+function pix(map,pal,size){let r="";map.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch!==".")r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${pal[ch]}"/>`;}));
+ return `<svg viewBox="0 0 8 8" width="100%" height="100%" shape-rendering="crispEdges" style="image-rendering:pixelated">${r}</svg>`;}
+const CREEPER=["abacabca","cabacbab","bkkbbkka","akkabkkb","bacKKcab","cbKKKKba","abKbbKca","bcKacKab"];
+const CPAL={a:"#5bbf45",b:"#3e9a2c",c:"#7fd96a",k:"#111",K:"#1a1a1a"};
+const GPAL={a:"#9a9a9a",b:"#7d7d7d",c:"#b9b9b9",k:"#e32",K:"#333"};
+const GOLD={a:"#f4d35e",b:"#d4a017",c:"#fff2a8",k:"#6b4b00",K:"#6b4b00"};
+const creeper=done=>pix(CREEPER,done?GOLD:CPAL);
+const golem=()=>pix(["aabbaabb","bcaabcaa","akkaakkb","abbccbba","bKKKKKKa","aKbaabKb","abbaabba","babbabab"],GPAL);
+function particles(el,col,n){const r=el.getBoundingClientRect(),w=document.createElement("div");w.className="particles";w.style.left=(r.left+r.width/2)+"px";w.style.top=(r.top+r.height/2)+"px";
+ for(let i=0;i<(n||22);i++){const p=document.createElement("i");p.style.background=col||(i%3?"#5bbf45":"#ddd");w.appendChild(p);const a=Math.random()*6.28,d=60+Math.random()*120;
+  p.animate([{transform:"translate(0,0)",opacity:1},{transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px) rotate(${Math.random()*360}deg)`,opacity:0}],{duration:700+Math.random()*400,easing:"cubic-bezier(.2,.8,.3,1)",fill:"forwards"});}
+ document.body.appendChild(w);setTimeout(()=>w.remove(),1300);}
+
+/* ---------- carte ---------- */
+const won=()=>CREEPERS.reduce((a,c)=>a+(S.done[c.id]?c.pts:0),0);
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id===id));}
+function renderGauge(){const w=won();$("gWon").style.width=(w/20*100)+"%";$("gTxt").textContent=fr(9+w)+" / 20";}
+function renderMap(){const P=$("paper");P.innerHTML="";
+ for(const ex of [1,2,3,4]){const z=document.createElement("div");z.className="zone";const list=CREEPERS.filter(c=>c.ex===ex);
+  const lost=list.reduce((a,c)=>a+c.pts,0),back=list.reduce((a,c)=>a+(S.done[c.id]?c.pts:0),0);
+  z.innerHTML=`<h3>${EXN[ex].name}</h3><span class="znote">${EXN[ex].note}</span><div class="mut small">Points perdus : ${fr(lost)} · récupérés : <b>${fr(back)}</b></div><div class="creepers"></div>`;
+  list.forEach(c=>{const d=document.createElement("div");d.className="cr"+(S.done[c.id]?" done":"");d.dataset.id=c.id;
+   d.innerHTML=`<div class="face">${creeper(S.done[c.id])}</div><span class="his">${esc(S.done[c.id]?c.exp:c.his)}</span><span class="nt">${esc(c.notion)}</span><span class="pts">${S.done[c.id]?"✔ +":""}${fr(c.pts)} pt</span>`;
+   d.onclick=()=>{SND.click();startCreeper(c.id);};z.querySelector(".creepers").appendChild(d);});
+  P.appendChild(z);}
+ const left=CREEPERS.filter(c=>!S.done[c.id]).length;$("portal").classList.toggle("open",!left);
+ const best=S.boss.length?Math.max(...S.boss.map(b=>b.score)):null;
+ $("pTxt").innerHTML=left?`Le portail du <b>DT bis</b> s'ouvre quand les ${CREEPERS.length} creepers ont explosé. Encore <b>${left}</b>.`:`Le portail est ouvert ! Un DT tout neuf t'attend, noté sur 20.`+(best!=null?` Meilleure note : <b>${fr(best)} / 20</b>.`:"");
+ $("bBoss").disabled=!!left;renderGauge();}
+
+/* ---------- rencontre (creeper, boss, table) ---------- */
+let RUN=null;
+function openEnc(){$("enc").classList.add("on");$("eMsg").textContent="";$("eMsg").className="msg";}
+function closeEnc(){$("enc").classList.remove("on");RUN=null;try{document.activeElement.blur()}catch(e){}renderMap();}
+function startCreeper(id,at){const C=CREEPERS.find(c=>c.id===id);RUN={mode:"c",C,steps:C.steps,i:at||0,tries:0,st:{grid:{},blocks:{},slots:{},villa:0,rev:{}},errs:0};
+ openEnc();$("eHead").textContent="🟩 "+C.name+(S.done[id]?" (entraînement)":"");SND.hiss();renderStep();}
+function stepNow(){return RUN.steps[RUN.i];}
+function pipsHTML(){return RUN.steps.map((s,i)=>`<i class="${i<RUN.i?"ok":i===RUN.i?"cur":""}${s.twin?" tw":""}"></i>`).join("");}
+function renderScene(){const R=RUN;
+ if(R.mode==="c"){const C=R.C;$("eScene").innerHTML=`<div class="bigface" id="bigFace">${creeper(false)}</div><div class="bubble"><b class="q">Sujet : ${esc(C.q)}</b>Sur ta copie : <span class="hisw">${esc(C.his)}</span><div class="mut small">Notion : ${esc(C.notion)} · ${fr(C.pts)} point à récupérer</div></div>`;}
+ else if(R.mode==="b"){const lost=R.max-R.score-R.lost;$("eScene").innerHTML=`<div class="golem" id="bigFace">${golem()}</div><div class="bubble"><b class="q">Le Golem du DT · ${esc(R.part())}</b><div class="bossbar"><div class="hp"><i style="width:${(20-R.score)/20*100}%"></i></div><b>Note : ${fr(R.score)} / 20</b></div><div class="mut small">Chaque bonne réponse lui retire des points de vie. Pas de deuxième essai : c'est un vrai DT.</div></div>`;}
+ else $("eScene").innerHTML=`<div class="bigface">${pix(["kkkkkkkk","kccccccK","kcaaaacK","kccccccK","kcaaaacK","kccccccK","kcaaaacK","kkkkkkkk"],{k:"#6b3e1d",K:"#6b3e1d",c:"#f3e6c4",a:"#9b8a66",b:"#000"})}</div><div class="bubble"><b class="q">${esc(TABLES[R.k].title)}</b>${TABLES[R.k].kind==="decl"?"Récite toute la table : du nominatif à l'ablatif, au singulier puis au pluriel.":"Récite toutes les formes dans l'ordre"+(TABLES[R.k].kind==="comp"?", chacune avec son sens.":".")}</div>`;}
+function blocksHTML(words,st,cur){return `<div class="sent">${words.map((w,i)=>{const b=st.blocks[i];return `<div class="blk ${b?b.cls:""}${i===cur?" cur":""}">${esc(w)}${b?`<small>${esc(b.lab)}</small>`:""}</div>`;}).join("")}</div>
+ <div class="legend"><span><i style="background:#c9a227"></i>nominatif</span><span><i style="background:#b23a32"></i>accusatif</span><span><i style="background:#7b3fb5"></i>génitif</span><span><i style="background:#2f6fd0"></i>datif</span><span><i style="background:#2e8b3a"></i>ablatif</span><span><i style="background:#4a4a4a"></i>verbe</span></div>`;}
+function villaHTML(n){let h="";for(let i=0;i<n;i++)h+=`<i class="${i>=n-12&&n>=36?"roof":""}" style="grid-column:${i%12+1};grid-row:${6-Math.floor(i/12)}"></i>`;return `<div class="vlab">🏠 La villa se construit à chaque bonne réponse</div><div class="villa on">${h}</div>`;}
+function renderCtx(){const R=RUN,s=stepNow(),E=$("eCtx");
+ if(R.mode==="t"){E.innerHTML=R.res||"";return;}
+ if(R.mode==="b"){E.innerHTML=s&&s.ctx?s.ctx:"";return;}
+ const C=R.C,st=R.st;
+ if(C.ctx==="table-cas"){const F=["sujet / attribut du sujet","apostrophe","COD","complément du nom","COI","complément circonstanciel"];
+  E.innerHTML=`<div class="anvil" style="grid-template-columns:130px 1fr">${ORDER.map((c,i)=>`<div class="h">${CASES[c]}</div><div class="${st.rev[i]||i===2||i===4?"ing":"c"}">${i===0&&!st.rev[0]?'<span class="old">COD</span>':st.rev[i]||i===2||i===4?F[i]:"?"}</div>`).join("")}</div>`;}
+ else if(C.ctx==="forge"){const T=TABLES[C.tab],num=C.id==="c2"?"sg":"pl",his=C.his.split(" · ");
+  const cell=(n,i)=>{const k=n+i,cur=s&&s.place&&s.place.num===n&&s.place.i===i;
+   if(st.grid[k])return `<div class="ing">${T[n][i]}</div>`;if(n===num&&i<3&&his[i]&&!/barré/.test(his[i]))return `<div class="${cur?"cur":""}"><span class="old">${esc(his[i])}</span></div>`;
+   if(n===num&&C.id==="c3"&&i===3)return `<div class="${cur?"cur":""}"><span class="old">puerorum (barré)</span></div>`;return `<div class="${cur?"cur":"c"}">${cur?"⬅ à forger":"?"}</div>`;};
+  E.innerHTML=`<div class="anvil"><div class="h">${esc(T.title.split(" :")[0])}</div><div class="h">singulier</div><div class="h">pluriel</div>${ORDER.map((c,i)=>`<div class="h">${CASES[c]}</div>${cell("sg",i)}${cell("pl",i)}`).join("")}</div>`;}
+ else if(C.ctx==="forge-conj"){E.innerHTML=`<div class="mut small">Préfixes : de- · prae- · ab- · ad- · pro- (prod- devant voyelle) · pos-/pot- &nbsp;+&nbsp; une forme de sum</div><div class="conj">${(st.forged||[]).map(f=>`<span class="ing">${esc(f)}</span>`).join("")||"<span>…</span>"}</div>`;}
+ else if(C.ctx==="chantier"){const tw=s&&s.ws;const words=tw||C.words;const bst=tw?(st.tw=st.tw||{blocks:{}}):st;
+  E.innerHTML=blocksHTML(words,bst,s?s.w:-1)+villaHTML(st.villa)+(st.trad?`<div class="trad">✔ ${esc(st.trad)}</div>`:"");}
+ else if(C.ctx==="theme"){const cur=s&&s.slot;E.innerHTML=`<div class="theme">${C.fr.map((f,i)=>{const forged=st.slots[i],bad=C.bad[i]!=null&&!forged;
+   return `<div class="fr">${esc(f)}</div><div class="la ${forged||!bad?"ing":"bad"}${cur===i?" cur":""}">${forged||!bad?esc(C.la[i]):`<s>${esc(C.bad[i])}</s>`}</div>`;}).join("")}</div>`+(st.forged&&st.forged.length?`<div class="conj" style="margin-top:6px">${st.forged.map(f=>`<span class="ing">${esc(f)}</span>`).join("")}</div>`:"");}}
+function renderStep(){const R=RUN,s=stepNow();if(!s)return finish();R.tries=0;$("chWrap").classList.remove("hide");
+ $("ePips").innerHTML=R.mode==="t"?"":pipsHTML();renderScene();renderCtx();
+ $("ePrompt").innerHTML=(s.twin?"<span style=\"color:#7b3fb5\">◆ </span>":"")+s.p;
+ const f=$("ch-in");f.value="";f.placeholder=s.k==="cas"?"ex : ablatif pluriel":s.k==="form"?"forme latine":s.tr?"ta traduction":"ta réponse, avec tes mots";
+ f.rows=s.k==="form"||s.k==="cas"?1:(s.tr||R.mode==="t"?3:2);autoGrow();
+ $("eRule").classList.add("hide");$("eMsg").textContent="";$("eMsg").className="msg";$("eGo").classList.remove("hide");$("eNext").classList.add("hide");$("eHint").classList.toggle("hide",R.mode==="b");$("eGo").disabled=false;}
+function autoGrow(){const f=$("ch-in");f.style.height="auto";f.style.height=Math.max(54,f.scrollHeight+4)+"px";}
+function say(t,cls){const m=$("eMsg");m.innerHTML=t;m.className="msg "+(cls||"");}
+function evalStep(s,v){if(s.k==="form")return checkForm(v,s);if(s.k==="cas")return checkCas(v,s.cas);return checkSens(v,s);}
+function koMsg(s,r){if(s.k==="form")return r.close?"Une seule lettre de différence. En latin, une lettre change le cas : regarde bien la fin du mot.":"Ce n'est pas la bonne forme.";
+ if(s.k==="cas")return r.why||"Ce n'est pas ce cas.";
+ if(r.forb&&r.forb.length)return `« ${r.forb[0]} » change le sens. `+(s.tr?"Regarde le nombre de chaque mot.":"");
+ return s.tr?"Le sens n'y est pas encore. Il manque une idée importante.":"Il manque l'idée principale.";}
+function apply(s,v){const R=RUN,st=R.st;if(R.mode!=="c")return;const C=R.C;
+ if(s.place){st.grid[s.place.num+s.place.i]=1;}
+ if(C.ctx==="table-cas"){if(R.i===1)st.rev[0]=1;if(/génitif/.test(s.p))st.rev[3]=1;if(/vocatif/.test(s.p))st.rev[1]=1;if(/ablatif/.test(s.p))st.rev[5]=1;}
+ if(C.ctx==="forge-conj"&&s.k==="form"){(st.forged=st.forged||[]).push(s.a[0]);}
+ if(C.ctx==="theme"){if(s.slot!=null&&s.k==="form")st.slots[s.slot]=C.la[s.slot];else if(s.k==="form"&&s.twin)(st.forged=st.forged||[]).push(s.a[0]);}
+ if(C.ctx==="chantier"){const bst=s.ws?(st.tw=st.tw||{blocks:{}}):st;
+  if(s.k==="cas")bst.blocks[s.w]={cls:s.cas[0],lab:`${CASES[s.cas[0]].slice(0,3)}. ${s.cas[1]==="sg"?"sg":"pl"}`};
+  if(s.role==="verbe")bst.blocks[s.w]={cls:"verbe",lab:"verbe"};
+  if(s.role==="sujet")bst.blocks[s.w]={cls:"nom",lab:"sujet"};
+  if(s.k==="sens"&&s.w!=null&&!bst.blocks[s.w])bst.blocks[s.w]={cls:"verbe",lab:"verbe"};
+  st.villa=Math.min(48,st.villa+6);SND.place();
+  if(s.tr&&!s.twin)st.trad=C.exp;}}
+function check(){const R=RUN;if(!R)return;const s=stepNow();const v=$("ch-in").value.trim();if(!v){say("Écris ta réponse d'abord.","near");return;}
+ if(R.mode==="t")return checkTable(v);
+ if(R.mode==="b")return bossCheck(s,v);
+ const r=evalStep(s,v);
+ if(r.ok){SND[s.k==="form"?"anvil":"ok"]();apply(s,v);
+  let m=s.k==="form"?"✔ Forgé !":s.k==="cas"?"✔ Bien analysé !":"✔ C'est le bon sens !";
+  if(r.near)m+=` <span style="color:#b86b00">Ta phrase n'a pas tout, mais le sens y est.</span>`;
+  if(s.tr)m+=`<br>Traduction : « ${esc(s.twin?(s.exp||v):R.C.exp)} »`;
+  say(m,"ok");$("eGo").disabled=true;R.i++;setTimeout(()=>{if(RUN===R)renderStep();},s.tr?1600:850);return;}
+ R.tries++;R.errs++;S.err[R.C.id]=(S.err[R.C.id]||0)+1;save();SND.ko();const bf=$("bigFace");if(bf){bf.classList.remove("hurt");void bf.offsetWidth;bf.classList.add("hurt");}
+ say("✖ "+koMsg(s,r)+(R.tries===1?" Réessaie, ou touche 💡.":""),"ko");
+ if(R.tries>=2&&s.rule){const e=$("eRule");e.innerHTML="<b>📘 La règle :</b> "+esc(s.rule);e.classList.remove("hide");}
+ if(R.tries>=3&&s.k==="form")say(`✖ La bonne forme est <b>${esc(s.a[0])}</b>. Tape-la pour la forger.`,"ko");
+ if(R.tries>=3&&s.k==="cas")say(`✖ C'est <b>${CASES[s.cas[0]]} ${s.cas[1]==="sg"?"singulier":"pluriel"}</b>. Tape-le, en lisant la règle.`,"ko");
+ if(R.tries>=3&&s.k==="sens"&&s.hint)say("✖ "+koMsg(s,r)+" Indice : "+esc(s.hint),"ko");}
+function hint(){const R=RUN;if(!R||R.mode==="b")return;const s=stepNow();if(R.mode==="t"){say("Commence par le nominatif singulier, puis descends jusqu'à l'ablatif. Ensuite le pluriel.","near");return;}
+ SND.click();say("💡 "+(s.hint||s.rule||""),"near");}
+function finish(){const R=RUN;if(R.mode==="b")return bossEnd();const C=R.C,first=!S.done[C.id];S.done[C.id]=true;save();
+ const bf=$("bigFace");bf.classList.add("boom");SND.boom();particles(bf);
+ say(first?`💥 Creeper explosé ! <b>+${fr(C.pts)} point</b> récupéré. Note : ${fr(9+won())} / 20.`:"💥 Creeper explosé encore une fois. Bien révisé !","ok");
+ $("chWrap").classList.add("hide");$("eGo").classList.add("hide");$("eHint").classList.add("hide");$("ePrompt").textContent="";$("eNext").classList.remove("hide");$("eNext").textContent="Retour à la copie ➜";
+ if(first)setTimeout(()=>SND.level(),700);}
+
+/* ---------- tables + Papa écoute ---------- */
+function renderTables(){$("tList").innerHTML=Object.keys(TABLES).map(k=>{const P=S.papa[k]||[],last=P[P.length-1];
+ return `<button class="btn ${last&&last.g==="coeur"?"green":""}" data-t="${k}">${esc(TABLES[k].title)}<small>${last?"Papa : "+({coeur:"par cœur",presque:"presque",revoir:"à revoir"})[last.g]:"pas encore récitée"}</small></button>`;}).join("");
+ $("tList").querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{SND.click();$("tables").classList.remove("on");openTable(b.dataset.t);});}
+function openTable(k){RUN={mode:"t",k,steps:[{k:"table",p:"Tape (ou dicte) toute la table. Ou appelle papa avec 👂 Papa écoute."}],i:0,res:""};openEnc();$("eHead").textContent="📜 Réciter : "+TABLES[k].title;renderStep();}
+function expected(k){const T=TABLES[k];return T.kind==="decl"?[...T.sg,...T.pl]:T.forms;}
+function lcs(a,b){const m=a.length,n=b.length,d=Array.from({length:m+1},()=>Array(n+1).fill(0));for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)d[i][j]=a[i-1]===b[j-1]?d[i-1][j-1]+1:Math.max(d[i-1][j],d[i][j-1]);
+ const keep=new Set();let i=m,j=n;while(i&&j){if(a[i-1]===b[j-1]){keep.add(i-1);i--;j--;}else if(d[i-1][j]>=d[i][j-1])i--;else j--;}return keep;}
+function checkTable(v){const k=RUN.k,T=TABLES[k],E=expected(k);const LAB=/^(nom|nominatif|voc|vocatif|acc|accusatif|gen|genitif|dat|datif|abl|ablatif|singulier|pluriel|sg|pl|sing|plur)$/;
+ const U=toks(v).filter(t=>!LAB.test(t));const keep=lcs(E,U);let ok=keep.size===E.length;let extra="";
+ if(T.kind==="comp"){const miss=T.keys.filter(g=>!g.some(a=>phraseIn(toks(v),a)));if(miss.length){ok=false;extra=` Il manque le sens de ${miss.length} verbe${miss.length>1?"s":""}.`;}}
+ RUN.res=T.kind==="decl"?`<div class="anvil"><div class="h"></div><div class="h">singulier</div><div class="h">pluriel</div>${ORDER.map((c,i)=>`<div class="h">${CASES[c]}</div><div class="${keep.has(i)?"ing":"c"}">${keep.has(i)?T.sg[i]:"?"}</div><div class="${keep.has(6+i)?"ing":"c"}">${keep.has(6+i)?T.pl[i]:"?"}</div>`).join("")}</div>`
+  :`<div class="conj">${E.map((f,i)=>`<span class="${keep.has(i)?"ing":""}">${keep.has(i)?f:"?"}</span>`).join("")}</div>`;
+ renderCtx();
+ if(ok){SND.level();say("✔ Table complète, dans l'ordre ! Fais-la valider par papa avec 👂 Papa écoute.","ok");}
+ else{SND.ko();const n=E.length-keep.size;say(`✖ ${n?`${n} forme${n>1?"s":""} manquante${n>1?"s":""} ou fausse${n>1?"s":""} (les « ? »).`:""}${extra} Corrige et revalide.`,"ko");}}
+function papaRes(f,g){return {papa:g,ok:g!=="revoir"};}
+function dictNorm(s){return String(s);}
+function tablePapa(g,f){(S.papa[f]=S.papa[f]||[]).push({g,d:new Date().toISOString().slice(0,10)});save();
+ say(g==="coeur"?"👂 Papa a dit : par cœur ! Bravo.":g==="presque"?"👂 Papa a dit : presque. Ça compte, relis les cases difficiles.":"👂 Papa a dit : à revoir. Relis la table puis recommence.",g==="revoir"?"ko":"ok");
+ if(g!=="revoir"){SND.level();}else SND.ko();}
+
+/* ---------- boss : DT bis ---------- */
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;};
+function buildBoss(){const P=BOSS_POOL,st=[];
+ shuffle(P.casfonc).slice(0,3).forEach(([c,f,g])=>st.push({k:"sens",ex:1,p:`Ex 1 · Quelle est la fonction du <b>${c}</b> ?`,g,crit:[0],pts:.5,sol:f}));
+ const tab=shuffle(P.decl)[0],T=TABLES[tab];["sg","pl"].forEach(n=>ORDER.forEach((c,i)=>st.push({k:"form",ex:1,p:`Ex 1 · Décline <b>${esc(T.title)}</b> · ${CASES[c]} ${n==="sg"?"singulier":"pluriel"} ?`,a:[T[n][i]],pts:.125,sol:T[n][i],tab,n,i})));
+ shuffle(P.ident).slice(0,2).forEach(([w,opts])=>st.push({k:"cas",ex:1,p:`Ex 1 · Donne toutes les possibilités (cas et nombre) pour <b>${w}</b>.`,cas:opts.length===1?opts[0]:opts,pts:.5,sol:opts.map(o=>CASES[o[0]]+" "+(o[1]==="sg"?"singulier":"pluriel")).join(", ")}));
+ shuffle(P.conj).slice(0,8).forEach(([f,l])=>st.push({k:"form",ex:2,p:`Ex 2 · Traduis en latin : <b>${f}</b>`,a:[l],pts:.5,sol:l}));
+ shuffle(P.phr).slice(0,4).forEach(ph=>{const words=ph.la.replace(/\.$/,"").split(" ");const ctx=`<div class="sent">${words.map(w=>`<div class="blk">${esc(w)}</div>`).join("")}</div>`;
+  ph.an.forEach(([w,c])=>st.push({k:"cas",ex:3,p:`Ex 3 · <b>${w}</b> : quel cas et quel nombre ?`,cas:c,pts:.5,ctx,sol:CASES[c[0]]+" "+(c[1]==="sg"?"singulier":"pluriel")}));
+  st.push({k:"sens",ex:3,tr:1,p:`Ex 3 · Traduis : <b>${esc(ph.la)}</b>`,g:ph.g,crit:ph.crit,forbid:ph.forbid,pts:1,ctx,sol:ph.fr});});
+ shuffle(P.theme).slice(0,2).forEach(th=>{const per=2/th.parts.length;th.parts.forEach(([f,l],i)=>st.push({k:"form",ex:4,p:`Ex 4 · « ${esc(th.fr)} » <br>Écris en latin : <b>${esc(f)}</b>`,a:[l],pts:per,sol:l}));});
+ return st;}
+function startBoss(force){if(!force&&CREEPERS.some(c=>!S.done[c.id])){toast("Fais d'abord exploser tous les creepers.");return;}
+ const steps=buildBoss();RUN={mode:"b",steps,i:0,score:0,lost:0,max:20,log:[],part(){const s=this.steps[this.i];return s?["","Ex 1 · cas et déclinaisons (4 pts)","Ex 2 · sum et ses composés (4 pts)","Ex 3 · analyse et traduction (8 pts)","Ex 4 · thème (4 pts)"][s.ex]:"Fin du DT";}};
+ openEnc();$("eHead").textContent="⚔ Le DT bis · 20 points";SND.portal();renderStep();}
+function bossCheck(s,v){const R=RUN;const r=evalStep(s,v);let got=0;
+ if(r.ok)got=s.pts;else if(s.k==="sens"&&s.tr&&!(r.forb&&r.forb.length)&&r.score>=.5)got=s.pts/2;else if(s.k==="cas"&&r.n>1&&r.score>=.5)got=s.pts/2;
+ R.score+=got;R.lost+=s.pts-got;R.log.push({p:s.p.replace(/<[^>]+>/g,""),v,ok:got===s.pts,got,pts:s.pts,sol:s.sol});
+ if(got===s.pts){SND.hurt();say(`✔ Juste ! +${fr(got)}`,"ok");const g=$("bigFace");g.classList.remove("hurt");void g.offsetWidth;g.classList.add("hurt");R.i++;$("eGo").disabled=true;setTimeout(()=>{if(RUN===R)renderStep();},700);}
+ else{SND.ko();say(`${got?"◐ À moitié : +"+fr(got)+". ":"✖ "}Réponse attendue : <b>${esc(s.sol)}</b>`,got?"near":"ko");R.i++;$("eGo").classList.add("hide");$("eNext").classList.remove("hide");$("eNext").textContent="Continuer ➜";}
+ renderScene();}
+function bossEnd(){const R=RUN,sc=Math.round(R.score*4)/4;$("chWrap").classList.add("hide");S.boss.push({d:new Date().toISOString().slice(0,10),score:sc});save();
+ $("ePips").innerHTML="";$("ePrompt").textContent="";$("eGo").classList.add("hide");$("eHint").classList.add("hide");$("eNext").classList.remove("hide");$("eNext").textContent="Retour à la copie ➜";
+ const ko=R.log.filter(l=>!l.ok);if(sc>=18){SND.boom();particles($("bigFace"),"#9a9a9a",30);$("bigFace").classList.add("boom");setTimeout(()=>SND.level(),600);}else SND.ko();
+ $("eCtx").innerHTML=`<div class="score">${fr(sc)} / 20</div><p><b>${sc>=20?"20 sur 20 ! Le Golem du DT est pulvérisé.":sc>=18?"Excellent ! Le Golem est tombé.":sc>=14?"Bien. Encore quelques fissures dans le Golem.":"Le Golem tient encore. Revois les erreurs ci-dessous puis rejoue : le DT change à chaque fois."}</b></p>
+ ${ko.length?`<div class="recap">${ko.map(l=>`<div class="ko">✖ ${esc(l.p)}<br>Ta réponse : ${esc(l.v)} → attendu : <b>${esc(l.sol)}</b></div>`).join("")}</div>`:""}`;
+ say("","");}
+
+/* ---------- branchements ---------- */
+$("bPlay").onclick=()=>{SND.click();show("map");renderMap();};
+$("tCreeper").innerHTML=creeper(false);
+$("bSound").onclick=()=>{S.mute=!S.mute;save();$("bSound").textContent=S.mute?"🔇":"🔊";if(!S.mute)SND.click();};$("bSound").textContent=S.mute?"🔇":"🔊";
+$("bTables").onclick=()=>{SND.click();renderTables();$("tables").classList.add("on");};
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>{$(b.dataset.close).classList.remove("on");});
+$("bBoss").onclick=()=>startBoss(false);
+$("eClose").onclick=()=>{SND.click();closeEnc();};
+$("eGo").onclick=check;$("eHint").onclick=hint;
+$("eNext").onclick=()=>{if(!RUN)return;if(RUN.mode==="c"&&RUN.i>=RUN.steps.length)return closeEnc();if(RUN.mode==="b"&&RUN.i>=RUN.steps.length&&!$("eGo").classList.contains("hide"))return closeEnc();
+ if(RUN.mode==="b"&&$("eCtx").querySelector(".score"))return closeEnc();renderStep();};
+$("ch-in").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();if(!$("eGo").classList.contains("hide")&&!$("eGo").disabled)check();else if(!$("eNext").classList.contains("hide"))$("eNext").click();}});
+$("ch-in").addEventListener("input",autoGrow);
+VOIX.attach("ch",{field:$("ch-in"),anchor:$("chWrap"),fiche:()=>RUN&&RUN.mode==="t"?RUN.k:null,papaOK:()=>!!(RUN&&RUN.mode==="t"),canRedo:()=>false,papa:(g,f)=>tablePapa(g,f),retry:()=>{}});
+window.__ch={S:()=>S,RUN:()=>RUN,CREEPERS,TABLES,checkSens,checkForm,checkCas,parseCas,startCreeper,startBoss,openTable,renderMap,won,
+ test:{forge(){show("map");renderMap();startCreeper("c2",1);},explain(){show("map");renderMap();startCreeper("c2",0);},chantierWhy(){show("map");renderMap();startCreeper("c7",5);},
+  chantierTrad(){show("map");renderMap();startCreeper("c7",7);},boss(){show("map");renderMap();startBoss(true);RUN.i=3;renderStep();},
+  papa(){show("map");renderMap();openTable("puer");setTimeout(()=>{document.querySelector("#vx-ch .vxpapa").click();document.getElementById("vxP1").click();},150);}}};
+
+</script><!--CLAVIER--><style>/* CLAVIER iPad : mode « clavier ouvert » */
+html.kb-on,html.kb-on body{overflow:hidden!important;overscroll-behavior:none}
+html.kb-on .kb-panel{z-index:9990!important}
+html.kb-on .kb-panel .schslot{max-height:calc(var(--kbh) * .22)!important;overflow:hidden}
+html.kb-on .kb-panel .schslot svg,html.kb-on .kb-panel .schslot img{max-height:calc(var(--kbh) * .2)!important;width:auto!important}
+html.kb-on .kb-panel textarea{min-height:64px!important;max-height:calc(var(--kbh) * .45)!important}
+html.kb-tight .kb-panel textarea{max-height:calc(var(--kbh) * .4)!important}
+html.kb-tight .kb-panel h1,html.kb-tight .kb-panel h2,html.kb-tight .kb-panel h3{font-size:1.05em!important;margin:2px 0!important}
+html.kb-on .kb-stick{position:sticky!important;bottom:0;z-index:20;padding-top:4px;padding-bottom:4px;box-shadow:0 -4px 10px rgba(0,0,0,.18)}
+html.kb-on .kb-lift{background:#fffdf3!important;color:#222!important;border:3px solid #333!important;border-radius:12px!important;padding:10px!important;box-shadow:0 8px 30px rgba(0,0,0,.45)!important;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+html.kb-on .kb-lift input,html.kb-on .kb-lift textarea{font-size:20px!important;min-width:60%;flex:1}
+html.kb-on .kb-squeeze,html.kb-on .kb-hidebtn{display:none!important}
+html.kb-on .kb-goonly{display:flex!important;flex-wrap:wrap;gap:8px;max-width:none!important;grid-template-columns:none!important}
+html.kb-on .kb-goonly>*{min-width:180px}
+</style><script>/* ===== CLAVIER iPad : garder la fenêtre de saisie visible au-dessus du clavier (partagé entre les jeux) =====
+   Sur iPad, le clavier prend environ la moitié de l'écran. Safari fait glisser la page et la fenêtre de saisie
+   se retrouve coupée en haut. Ici :
+   1. on suit window.visualViewport (resize, scroll) : c'est la zone vraiment visible au-dessus du clavier ;
+   2. la fenêtre qui contient le champ (panneau fixe, carte, écran) est replacée dans cette zone :
+      top = visualViewport.offsetTop, hauteur = visualViewport.height ;
+   3. le document ne défile plus (overflow caché, scrollTo(0,0)) ;
+   4. le schéma et la zone de texte sont réduits, la ligne de boutons « Valider » reste collée en bas,
+      et la zone défile pour montrer le champ et le texte tapé. */
+const KB={on:false,field:null,panel:null,saved:null,stick:null,fits:[],H0:0,raf:0,
+ editable(e){if(!e||e.disabled||e.readOnly)return false;if(e.isContentEditable)return true;const t=e.tagName;
+  if(t==="TEXTAREA")return true;if(t!=="INPUT")return false;const ty=(e.type||"text").toLowerCase();
+  return ["text","search","number","tel","email","url","password",""].includes(ty);},
+ vv(){const v=window.visualViewport;return v?{h:v.height,t:v.offsetTop||0}:{h:window.innerHeight,t:0};},
+ init(){this.H0=Math.max(window.innerHeight,document.documentElement.clientHeight||0);
+  document.addEventListener("focusin",e=>{if(!this.editable(e.target))return;this.field=e.target;this.kick();setTimeout(()=>this.kick(),120);setTimeout(()=>this.kick(),400);setTimeout(()=>this.kick(),900);},true);
+  document.addEventListener("focusout",()=>setTimeout(()=>{if(!this.editable(document.activeElement)){this.field=null;this.close();}},150),true);
+  document.addEventListener("input",e=>{if(e.target===this.field)this.kick();},true);
+  const v=window.visualViewport;if(v){v.addEventListener("resize",()=>this.kick());v.addEventListener("scroll",()=>this.kick());}
+  window.addEventListener("resize",()=>{if(!this.field)this.H0=Math.max(this.H0,window.innerHeight);this.kick();});
+  window.addEventListener("scroll",()=>{if(this.on)this.noScroll();},{passive:true});
+  window.addEventListener("orientationchange",()=>{this.H0=0;setTimeout(()=>{this.H0=window.innerHeight;this.kick();},500);});
+  setInterval(()=>{if(this.field||this.on)this.update();},500);},
+ kick(){cancelAnimationFrame(this.raf);this.raf=requestAnimationFrame(()=>this.update());},
+ noScroll(){if(window.scrollX||window.scrollY)window.scrollTo(0,0);const se=document.scrollingElement;if(se&&se.scrollTop)se.scrollTop=0;},
+ findPanel(f){let e=f.parentElement,screen=null;
+  while(e&&e!==document.body){if(e.hasAttribute("data-kb-panel"))return e;const cs=getComputedStyle(e);
+   if(cs.position==="fixed")return e;if(!screen&&(e.classList.contains("screen")||cs.position==="absolute"&&e.offsetHeight>=window.innerHeight*.8))screen=e;e=e.parentElement;}
+  return screen||document.body;},
+ update(){const f=this.field;if(!f||document.activeElement!==f||!f.isConnected){if(this.on)this.close();return;}
+  const {h,t}=this.vv(),H0=Math.max(this.H0,h);if(!this.H0)this.H0=window.innerHeight;
+  const kb=h<H0*.85||window.innerHeight<H0*.85;if(!kb){if(this.on)this.close();return;}
+  const de=document.documentElement;de.classList.add("kb-on");de.classList.toggle("kb-tight",h<520);
+  de.style.setProperty("--kbh",h+"px");de.style.setProperty("--kbt",t+"px");this.on=true;this.noScroll();
+  const p=this.findPanel(f);if(p!==this.panel){this.restore();this.panel=p;
+   const r=p.getBoundingClientRect();this.saved={css:p.getAttribute("style"),full:r.height>=window.innerHeight*.88||p===document.body,left:r.left,width:r.width};p.classList.add("kb-panel");}
+  const s=this.saved,m=s.full?0:4;
+  Object.assign(p.style,{position:"fixed",top:(t+m)+"px",bottom:"auto",left:s.left+"px",width:s.width+"px",right:"auto",transform:"none",
+   maxHeight:(h-2*m)+"px",height:s.full?(h-2*m)+"px":"",overflowY:"auto",webkitOverflowScrolling:"touch",margin:"0"});
+  if(f.tagName==="TEXTAREA"){if(this.taH==null||this.taEl!==f){this.taEl=f;this.taH=f.style.height;}f.style.height="auto";f.style.height=Math.min(f.scrollHeight+4,Math.round(h*(h<520?.4:.45)))+"px";f.scrollTop=f.scrollHeight;}
+  this.fitInner(p,t+m,t+h-m);this.markStick(f,p);this.reveal(f,p,t+m,t+h-m);for(let k=0;k<4&&this.squeeze(f,p);k++)this.reveal(f,p,t+m,t+h-m);this.liftCheck(f,t+m,t+h-m);},
+ squeeze(f,p){const st=this.stick;if(!st)return false;const sr=st.getBoundingClientRect();let did=false;this.squeezed=this.squeezed||[];
+  p.querySelectorAll("button,input,textarea,select,.symbar,[class*=sym]").forEach(e=>{if(did||!e.offsetParent||st.contains(e)||e===f||e.contains(f)||e.closest(".vx"))return;const r=e.getBoundingClientRect();
+   if(r.bottom>sr.top+1&&r.top<sr.bottom-1&&r.right>sr.left&&r.left<sr.right){let a=e;while(a.parentElement&&a.parentElement!==p&&!a.parentElement.contains(f)&&!a.parentElement.contains(st))a=a.parentElement;
+    if(a.contains(f)||a.contains(st)||a.classList.contains("vx"))return;a.classList.add("kb-squeeze");this.squeezed.push(a);did=true;}});return did;},
+
+ /* dernier recours : si le champ reste caché (petite boîte coincée sous autre chose), on soulève sa boîte en haut de la zone visible */
+ visible(f,top,bot){const r=f.getBoundingClientRect();if(r.top<top-1||r.bottom>bot+1||r.height<10)return false;const x=r.left+Math.min(r.width/2,30),y=r.top+Math.min(r.height/2,12);const e=document.elementFromPoint(x,y);return !!e&&(e===f||f.contains(e));},
+ liftCheck(f,top,bot){if(this.lift){Object.assign(this.lift.style,{top:(top+6)+"px",maxHeight:(bot-top-12)+"px"});return;}if(this.visible(f,top,bot))return;
+  let b=f.parentElement;while(b&&b.parentElement&&b.parentElement!==document.body&&b.parentElement.getBoundingClientRect().height<(bot-top)*.5&&!b.parentElement.classList.contains("kb-panel"))b=b.parentElement;
+  if(!b||b===document.body)return;this.lift=b;this.liftCss=b.getAttribute("style");b.classList.add("kb-lift");
+  Object.assign(b.style,{position:"fixed",left:"12px",right:"12px",width:"auto",top:(top+6)+"px",maxHeight:(bot-top-12)+"px",overflow:"auto",zIndex:"10000",transform:"none"});},
+ unlift(){if(this.lift){const b=this.lift;if(this.liftCss!=null)b.setAttribute("style",this.liftCss);else b.removeAttribute("style");b.classList.remove("kb-lift");this.lift=null;}},
+ /* les cartes internes qui défilent ne doivent pas dépasser la zone visible */
+ fitInner(p,top,bot){this.fits.forEach(([e,c])=>{e.style.maxHeight=c;});this.fits=[];
+  let e=this.field.parentElement;while(e&&e!==p){const cs=getComputedStyle(e);
+   if(/(auto|scroll)/.test(cs.overflowY)){const r=e.getBoundingClientRect();this.fits.push([e,e.style.maxHeight]);e.style.maxHeight=Math.max(120,bot-Math.max(r.top,top)-4)+"px";}e=e.parentElement;}},
+ markStick(f,p){if(this.stick&&this.stick.isConnected&&p.contains(this.stick))return;this.unstick();
+  const re=/valider|vérifier|verifier|entrer|garder|remettre|frapper|composter|alimenter|ouvrir la voie|billet|forger|✔|ok\b|➜|fini/i,isGo=x=>/(Go|Ok|OK|ok|Check)$/.test(x.id||"")||re.test(x.textContent);let e=f,found=null;
+  while(e&&e!==p&&!found){let s=e.nextElementSibling;while(s&&!found){const b=[...s.querySelectorAll?s.querySelectorAll("button"):[]].concat(s.tagName==="BUTTON"?[s]:[]);
+    if(b.some(x=>x.offsetParent&&isGo(x))&&s.getBoundingClientRect().top>=f.getBoundingClientRect().bottom-2){found=s;this.goOnly=s.offsetHeight>=160?b.filter(x=>!isGo(x)&&x.offsetParent):null;}s=s.nextElementSibling;}e=e.parentElement;}
+  if(found){let q=found.parentElement;while(q&&q!==p){if(/(hidden|clip)/.test(getComputedStyle(q).overflowY)){found=null;break;}q=q.parentElement;}}
+  if(found){let bg="",a=found;while(a&&a!==document.documentElement){const c=getComputedStyle(a).backgroundColor;if(c&&c!=="transparent"&&!/rgba\(.*,\s*0\)$/.test(c)){bg=c;break;}a=a.parentElement;}
+   if(this.goOnly){this.goOnly.forEach(x=>x.classList.add("kb-hidebtn"));found.classList.add("kb-goonly");}
+   found.classList.add("kb-stick");this.stick=found;this.stickBg=found.style.background;found.style.background=bg||"#ddd";}},
+ unstick(){if(this.goOnly){this.goOnly.forEach(x=>x.classList.remove("kb-hidebtn"));this.goOnly=null;}(this.squeezed||[]).forEach(e=>e.classList.remove("kb-squeeze"));this.squeezed=[];if(this.stick){this.stick.classList.remove("kb-stick","kb-goonly");this.stick.style.background=this.stickBg||"";this.stick=null;}},
+ reveal(f,p,top,bot){const fr=f.getBoundingClientRect();let a=fr.top-8,b=fr.bottom+8;
+  const nx=f.parentElement&&f.parentElement.querySelector(".vx .vxchips,.vxchips");/* texte tapé (pastilles du micro) */
+  let after=null;if(!f.closest(".vx")){let e=f;for(let k=0;k<3&&e&&e!==p&&!after;k++){const n=e.nextElementSibling;if(n&&n.classList&&n.classList.contains("vx"))after=n;e=e.parentElement;}}
+  if(after){const ar=after.getBoundingClientRect();if(ar.height&&ar.bottom-a<(bot-top)*.8)b=Math.max(b,ar.bottom+4);}
+  const st=this.stick?this.stick.getBoundingClientRect().height:0;
+  let e=f.parentElement;const chain=[];while(e){chain.push(e);if(e===p)break;e=e.parentElement;}
+  for(const sc of chain){const cs=getComputedStyle(sc);if(!(/(auto|scroll)/.test(cs.overflowY)||sc===p)||sc.scrollHeight<=sc.clientHeight+1)continue;
+   const r=sc.getBoundingClientRect(),vt=Math.max(r.top,top),vb=Math.min(r.bottom,bot)-(this.stick&&sc.contains(this.stick)?st+(parseFloat(cs.paddingBottom)||0)+6:0);
+   let d=0;if(b>vb)d=Math.min(b-vb,a-vt);if(a<vt)d=a-vt;if(d){const before=sc.scrollTop;sc.scrollTop+=d;const moved=sc.scrollTop-before;a-=moved;b-=moved;}}},
+ restore(){this.unstick();this.unlift();if(this.taEl){this.taEl.style.height=this.taH||"";this.taEl=null;this.taH=null;}this.fits.forEach(([e,c])=>{e.style.maxHeight=c;});this.fits=[];
+  if(this.panel){const s=this.saved;if(s&&s.css!=null)this.panel.setAttribute("style",s.css);else this.panel.removeAttribute("style");this.panel.classList.remove("kb-panel");}
+  this.panel=null;this.saved=null;},
+ close(){this.restore();this.on=false;const de=document.documentElement;de.classList.remove("kb-on","kb-tight");}
+};
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>KB.init());else KB.init();
+</script><!--/CLAVIER-->
+</body></html>
