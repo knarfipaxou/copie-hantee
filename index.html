@@ -261,6 +261,52 @@ const IOSAU={get:null,el:null,unlocked:false,
  instrument(SND){Object.keys(SND).forEach(k=>{const f=SND[k];if(typeof f!=="function")return;SND[k]=function(...a){__snd.count[k]=(__snd.count[k]||0)+1;__snd.log.push(k);if(__snd.log.length>300)__snd.log.shift();return f.apply(this,a);};});return SND;}
 };
 
+/* ================= REPRISE : garder une partie en cours (localStorage) =================
+   Outils communs : hasard rejouable (graine), purge des parties trop vieilles, fenêtre « Reprendre ». */
+(function(){
+ const MAXAGE=7*864e5;
+ function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
+ const css=`.rp-ov{position:fixed;inset:0;z-index:150;display:none;align-items:center;justify-content:center;background:rgba(10,10,15,.72);padding:16px}
+.rp-ov.on{display:flex}
+.rp-card{width:min(560px,94vw);max-height:92vh;overflow:auto;background:#c6c6c6;color:#222;border:4px solid #000;box-shadow:inset 4px 4px 0 #fff,inset -4px -4px 0 #555,0 12px 40px #000a;padding:18px 18px 14px;text-align:center;font-family:inherit}
+.rp-card h2{margin:4px 0 6px;font-size:24px}
+.rp-ico{font-size:40px;line-height:1}
+.rp-what{margin:4px 0 10px;font-size:18px;font-weight:700}
+.rp-pips{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;margin:0 auto 14px;max-width:470px}
+.rp-pips i{width:11px;height:11px;background:#8b8b8b;border:2px solid #000}
+.rp-pips i.ok{background:#5bbf45}.rp-pips i.cur{background:#f4d35e}
+.rp-bar{height:16px;border:3px solid #000;background:#8b8b8b;margin:0 auto 14px;max-width:420px}.rp-bar i{display:block;height:100%;background:#5bbf45}
+.rp-card button{font:inherit;cursor:pointer;border:3px solid #000;box-shadow:inset -3px -3px 0 #0005,inset 3px 3px 0 #fff6}
+.rp-go{display:block;width:100%;min-height:62px;font-size:21px!important;font-weight:800!important;background:#5bbf45;color:#fff;text-shadow:2px 2px 0 #0007;padding:10px 14px}
+.rp-row{display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.rp-new,.rp-later{min-height:44px;font-size:15px!important;background:#ddd;color:#333;padding:6px 14px}
+.rp-note{font-size:13px;color:#444;margin:10px 0 0}`;
+ function ensure(){let ov=document.getElementById("rpOv");if(ov)return ov;const st=document.createElement("style");st.textContent=css;document.head.appendChild(st);
+  ov=document.createElement("div");ov.id="rpOv";ov.className="rp-ov";document.body.appendChild(ov);return ov;}
+ const R={
+  MAXAGE,
+  seed(){return (Math.floor(Math.random()*2147483646)+1);},
+  withSeed(s,fn){if(s==null)return fn();const o=Math.random;Math.random=mulberry(s);try{return fn();}finally{Math.random=o;}},
+  purge(store){const now=Date.now();let ch=false;for(const k in store){const v=store[k];if(!v||typeof v!=="object"||!(now-(+v.ts||0)<MAXAGE)||now-(+v.ts||0)<-864e5){delete store[k];ch=true;}}return ch;},
+  latest(store){let b=null;for(const k in store){const v=store[k];if(v&&typeof v==="object"&&(!b||(+v.ts||0)>(+b.ts||0)))b=v;}return b;},
+  isOpen(){const o=document.getElementById("rpOv");return !!(o&&o.classList.contains("on"));},
+  close(){const o=document.getElementById("rpOv");if(o)o.classList.remove("on");},
+  /* o = {what (html), done, total, onGo, onNew, onLater (facultatif)} */
+  ask(o){const ov=ensure(),t=Math.max(1,o.total|0),d=Math.max(0,Math.min(t,o.done|0));
+   const vis=t<=80?`<div class="rp-pips">${Array.from({length:t},(x,i)=>`<i class="${i<d?"ok":i===d?"cur":""}"></i>`).join("")}</div>`:`<div class="rp-bar"><i style="width:${Math.round(100*d/t)}%"></i></div>`;
+   ov.innerHTML=`<div class="rp-card" role="dialog" aria-modal="true"><div class="rp-ico">⏸️</div><h2>Ta partie est gardée</h2><p class="rp-what">${o.what||""}</p>${vis}
+    <button class="rp-go" id="rpGo">▶ Reprendre où tu t'étais arrêté (${d}/${t})</button>
+    <div class="rp-row"><button class="rp-new" id="rpNew">↺ Recommencer</button>${o.onLater?'<button class="rp-later" id="rpLater">Plus tard</button>':""}</div>
+    <p class="rp-note">La partie reste gardée 7 jours.</p></div>`;
+   ov.classList.add("on");
+   const done=f=>()=>{ov.classList.remove("on");try{f&&f();}catch(e){console.error(e);}};
+   document.getElementById("rpGo").onclick=done(o.onGo);document.getElementById("rpNew").onclick=done(o.onNew);
+   const l=document.getElementById("rpLater");if(l)l.onclick=done(o.onLater);
+   ov.onclick=e=>{if(e.target===ov&&o.onLater)done(o.onLater)();};}
+ };
+ window.REPRISE=R;
+})();
+
 /* ================= DONNÉES : les erreurs de la copie du DT de latin (10/11) =================
    Chaque erreur de la copie est un creeper. pts = points perdus sur la copie, récupérés quand il explose.
    Étapes : form (forme latine exacte), sens (phrase en français, correction tolérante sur le sens),
@@ -653,7 +699,7 @@ function lessonSteps(L,review){if(review)return [{k:"memo",pass:4,rev:1,p:"Révi
  const st=[{k:"read",p:"① Comprendre : lis l'explication et l'exemple. Puis touche « J'ai compris ➜ »."}];
  const ps=["② Mémoriser · passe 1/4 : recopie la leçon.","② Mémoriser · passe 2/4 : des mots sont cachés, retape tout.","② Mémoriser · passe 3/4 : il ne reste que quelques mots, retape tout.","② Mémoriser · passe 4/4 : de mémoire ! (tu peux dicter, ou 👂 Papa écoute)"];
  for(let p=Math.min(4,(LS(L.id).pass||0)+1);p<=4;p++)st.push({k:"memo",pass:p,p:ps[p-1]});
- L.test.forEach(t=>st.push(Object.assign({},t,{test:1,p:"③ Raisonner : "+t.p})));return st;}
+ L.test.forEach((t,ti)=>st.push(Object.assign({},t,{test:1,ti,p:"③ Raisonner : "+t.p})));return st;}
 function startLesson(id,review){const L=LESSONS.find(x=>x.id===id);if(!lessonOpen(L)){toast("Termine d'abord la leçon "+(L.n-1)+".");return;}
  RUN={mode:"l",L,review:!!review,steps:lessonSteps(L,review),i:0,tries:0,errs:0,requeued:0,st:{}};openEnc();
  $("eHead").textContent=(review?"⏰ Révision · ":"📖 Leçon "+L.n+" · ")+L.title;SND.click();renderStep();}
@@ -1081,6 +1127,61 @@ window.__ch={S:()=>S,LESSONS,LREQ,startLesson,checkMemo,memoKeys,mastered,dueLes
   forge(){show("map");renderMap();startCreeper("c2",1);},explain(){show("map");renderMap();startCreeper("c2",0);},chantierWhy(){show("map");renderMap();startCreeper("c7",5);},
   chantierTrad(){show("map");renderMap();startCreeper("c7",7);},boss(){show("map");renderMap();startBoss(true);RUN.i=3;renderStep();},
   papa(){show("map");renderMap();openTable("puer");setTimeout(()=>{document.querySelector("#vx-ch .vxpapa").click();document.getElementById("vxP1").click();},150);}}};
+
+/* ================= REPRISE : une partie interrompue se reprend là où elle s'est arrêtée ================= */
+function rpStore(){if(!S.rp||typeof S.rp!=="object"||Array.isArray(S.rp))S.rp={};return S.rp;}
+function rpKey(R){if(!R)return null;if(R.mode==="l")return R.L?"l:"+R.L.id:null;if(R.mode==="c")return R.C?"c:"+R.C.id:null;if(R.mode==="b")return "b";return null;}
+function rpGet(k){const st=rpStore();if(REPRISE.purge(st))save();const b=st[k];return b&&typeof b==="object"&&b.i>=0&&b.n>0?b:null;}
+function rpDrop(k){const st=rpStore();if(st[k]){delete st[k];save();}}
+function rpStepD(s){return s.test?{ti:s.ti,again:s.again?1:0}:{k:s.k,pass:s.pass||0,rev:s.rev?1:0};}
+function rpStepFrom(L,d){if(d.ti!=null){const t=L.test[d.ti];if(!t)throw new Error("test");const s=Object.assign({},t,{test:1,ti:d.ti,p:"③ Raisonner : "+t.p});if(d.again)s.again=1;return s;}
+ if(d.k==="read")return {k:"read",p:"① Comprendre : lis l'explication et l'exemple. Puis touche « J'ai compris ➜ »."};
+ if(d.k==="memo"){if(d.rev)return {k:"memo",pass:4,rev:1,p:"Révision : retape la leçon de mémoire (ou appelle papa)."};
+  const ps=["② Mémoriser · passe 1/4 : recopie la leçon.","② Mémoriser · passe 2/4 : des mots sont cachés, retape tout.","② Mémoriser · passe 3/4 : il ne reste que quelques mots, retape tout.","② Mémoriser · passe 4/4 : de mémoire ! (tu peux dicter, ou 👂 Papa écoute)"];
+  return {k:"memo",pass:d.pass,p:ps[d.pass-1]};}
+ throw new Error("étape");}
+function rpSnap(){try{const R=RUN,k=rpKey(R);if(!k||!R.steps||R.ended)return;if(R.i>=R.steps.length)return;const st=rpStore();
+ if(R.i<1){if(st[k]){delete st[k];save();}return;}
+ const b={v:1,k,ts:Date.now(),mode:R.mode,i:R.i,n:R.steps.length};
+ if(R.mode==="l"){if(R.steps.some(s=>s.test&&s.ti==null))return;b.id=R.L.id;b.review=!!R.review;b.ds=R.steps.map(rpStepD);b.errs=R.errs||0;b.requeued=R.requeued||0;}
+ else if(R.mode==="c"){b.id=R.C.id;b.st=JSON.parse(JSON.stringify(R.st||{}));b.errs=R.errs||0;}
+ else if(R.mode==="b"){b.steps=JSON.parse(JSON.stringify(R.steps));b.score=R.score||0;b.lost=R.lost||0;b.log=R.log||[];}
+ st[k]=b;save();}catch(e){console.error(e);}}
+function rpWhat(b){try{if(b.mode==="l"){const L=LESSONS.find(x=>x.id===b.id),d=b.ds[b.i]||{};const ph=d.ti!=null?"Raisonner":d.k==="memo"?(d.rev?"Révision":"Mémoriser, passe "+d.pass+"/4"):"Comprendre";return "📖 Leçon "+L.n+" · "+esc(L.title)+"<br><small>"+ph+"</small>";}
+ if(b.mode==="c"){const C=CREEPERS.find(c=>c.id===b.id);return "🟩 "+esc(C.name);}
+ if(b.mode==="b")return "⚔ Le DT bis<br><small>Tes réponses déjà données sont gardées. Pas de deuxième essai.</small>";}catch(e){}return "Ta partie";}
+function rpFresh(b){if(b.mode==="l"){const L=LESSONS.find(x=>x.id===b.id);startLesson(b.id,dueLessons().includes(L));}else if(b.mode==="c")startCreeper(b.id);else if(b.mode==="b")startBoss(false);}
+function rpResume(b){try{
+  if(b.mode==="l"){const L=LESSONS.find(x=>x.id===b.id);if(!L||!Array.isArray(b.ds))throw new Error("leçon");const steps=b.ds.map(d=>rpStepFrom(L,d));
+   RUN={mode:"l",L,review:!!b.review,steps,i:Math.min(b.i,steps.length-1),tries:0,errs:b.errs||0,requeued:b.requeued||0,st:{}};openEnc();
+   $("eHead").textContent=(b.review?"⏰ Révision · ":"📖 Leçon "+L.n+" · ")+L.title;}
+  else if(b.mode==="c"){const C=CREEPERS.find(c=>c.id===b.id);if(!C||b.n!==C.steps.length)throw new Error("creeper");
+   RUN={mode:"c",C,steps:C.steps,i:Math.min(b.i,C.steps.length-1),tries:0,st:Object.assign({grid:{},blocks:{},slots:{},villa:0,rev:{}},b.st||{}),errs:b.errs||0};openEnc();
+   $("eHead").textContent="🟩 "+C.name+(S.done[C.id]?" (entraînement)":"");}
+  else if(b.mode==="b"){if(!Array.isArray(b.steps)||!b.steps.length)throw new Error("boss");
+   RUN={mode:"b",steps:b.steps,i:Math.min(b.i,b.steps.length),score:+b.score||0,lost:+b.lost||0,max:20,log:Array.isArray(b.log)?b.log:[],part(){const s=this.steps[this.i];return s?["","Ex 1 · cas et déclinaisons (4 pts)","Ex 2 · sum et ses composés (4 pts)","Ex 3 · analyse et traduction (8 pts)","Ex 4 · thème (4 pts)"][s.ex]:"Fin du DT";}};
+   openEnc();$("eHead").textContent="⚔ Le DT bis · 20 points";}
+  else throw new Error("mode");
+  SND.click();renderStep();toast("On reprend où tu t'étais arrêté.");
+ }catch(e){console.error(e);rpDrop(b.k);RUN=null;toast("Cette partie ne peut pas reprendre. On recommence.");try{rpFresh(b);}catch(x){}}}
+function rpAsk(b,fresh,later){REPRISE.ask({what:rpWhat(b),done:b.i,total:b.n,onGo:()=>rpResume(b),onNew:()=>{rpDrop(b.k);fresh();},onLater:later||(()=>{})});}
+/* ---------- branchements ---------- */
+renderStep=(function(o){return function(){const r=o.apply(this,arguments);rpSnap();return r;};})(renderStep);
+check=(function(o){return function(){const r=o.apply(this,arguments);rpSnap();return r;};})(check);
+$("eGo").onclick=check;
+lessonPapa=(function(o){return function(){const r=o.apply(this,arguments);rpSnap();return r;};})(lessonPapa);
+finish=(function(o){return function(){const R=RUN,k=rpKey(R);if(R)R.ended=true;if(k)rpDrop(k);return o.apply(this,arguments);};})(finish);
+lessonNext=(function(o){return function(){if(RUN)RUN.ended=false;return o.apply(this,arguments);};})(lessonNext);
+function rpWrapClicks(sel,keyOf){document.querySelectorAll(sel).forEach(b=>{if(b.__rp)return;const o=b.onclick;if(!o)return;b.__rp=1;
+ b.onclick=function(e){const k=keyOf(b),sv=k&&rpGet(k);if(sv){try{SND.click();}catch(x){}rpAsk(sv,()=>o.call(b,e));return;}return o.call(b,e);};});}
+renderMap=(function(o){return function(){const r=o.apply(this,arguments);try{rpWrapClicks("#lessons [data-l]",b=>"l:"+b.dataset.l);rpWrapClicks("#paper .cr[data-id]",b=>"c:"+b.dataset.id);}catch(e){console.error(e);}return r;};})(renderMap);
+$("bBoss").onclick=(function(o){return function(e){const sv=rpGet("b");if(sv){rpAsk(sv,()=>o.call(this,e));return;}return o.call(this,e);};})($("bBoss").onclick);
+$("bRev").onclick=(function(o){return function(e){const d=dueLessons();const sv=d.length&&rpGet("l:"+d[0].id);if(sv){rpAsk(sv,()=>o.call(this,e));return;}return o.call(this,e);};})($("bRev").onclick);
+$("bPlay").onclick=(function(o){return function(e){const r=o.call(this,e);try{if(!RUN){const st=rpStore();if(REPRISE.purge(st))save();const b=REPRISE.latest(st);if(b)rpAsk(b,()=>rpFresh(b));}}catch(x){console.error(x);}return r;};})($("bPlay").onclick);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")rpSnap();});
+window.addEventListener("pagehide",rpSnap);
+(function(){const st=rpStore();if(REPRISE.purge(st))save();})();
+window.__rp={snap:rpSnap,store:rpStore,get:rpGet,resume:rpResume,drop:rpDrop};
 
 </script><!--CLAVIER--><style>/* CLAVIER iPad : mode « clavier ouvert » */
 html.kb-on,html.kb-on body{overflow:hidden!important;overscroll-behavior:none}
