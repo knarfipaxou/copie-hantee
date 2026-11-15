@@ -135,6 +135,23 @@ textarea#ch-in:focus{outline:3px solid #f4d35e}
 
 .cr .nt{display:block;font-size:11px;color:#333;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
+/* leçon */
+.lessons{display:flex;gap:6px;align-items:stretch;margin:10px 14px 0;overflow-x:auto}
+.ltitle{color:#fff;font-weight:900;text-shadow:2px 2px 0 #000;align-self:center;white-space:nowrap;margin-right:4px}
+.lstone{flex:1;min-width:104px;border:3px solid #000;background:#8b8b8b;color:#fff;padding:5px 7px;cursor:pointer;box-shadow:inset 3px 3px 0 #ffffff55,inset -3px -3px 0 #0006;text-shadow:1px 1px 0 #000;font-size:12px;line-height:1.2;touch-action:manipulation}
+.lstone b{display:block;font-size:15px}.lstone span{display:block;font-weight:700}.lstone i{display:block;font-style:normal;opacity:.9;font-size:11px}
+.lstone.open{background:#c9a227;animation:glow 1.6s ease-in-out infinite}@keyframes glow{50%{box-shadow:inset 3px 3px 0 #ffffff55,inset -3px -3px 0 #0006,0 0 14px 4px #f4d35e}}.lstone.m{background:#3c8527}.lstone.lock{background:#555;opacity:.75}.lstone.due{outline:3px solid #f4d35e}
+.cr.lock{filter:grayscale(.85);opacity:.7}.cr.lock .face{animation:none}.cr.lock .nt{color:#8a1c1c;white-space:normal;line-height:1.15}
+.lexpl{background:#fff;border:3px solid #000;padding:8px 12px;font-size:15px;line-height:1.4;max-height:none}
+.ltab{border-collapse:collapse;margin:6px 0;font-size:14px}.ltab td,.ltab th{border:1px solid #999;padding:3px 8px;text-align:left}.ltab th{background:#eee}
+.lkey{background:#fff6d6;border-left:5px solid #c9a227;padding:4px 8px;margin:6px 0 0}
+.memo{background:#fffdf3;border:3px solid #5fae55;padding:8px 12px;font-size:17px;line-height:1.55;font-weight:600}
+.memo.hidden{color:#777;text-align:center;font-style:italic}
+.memo .gap{color:#999;letter-spacing:1px}.memo .miss{background:#ffd0d0;color:#9b1c1c;border-bottom:2px solid #c62828}
+.lphase{margin:3px 0;font-weight:800;font-size:13px;color:#888}.lphase span.on{color:#1f6d12;text-decoration:underline}
+.libnav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.libnav .btn{font-size:13px;min-height:38px;padding:4px 10px}
+#lib h3{margin:6px 0}
+
 /* VOIX : micro et Papa écoute */
 .vx{margin:6px 0;font-size:15px}
 .vxhide{display:none!important}
@@ -167,7 +184,7 @@ textarea#ch-in:focus{outline:3px solid #f4d35e}
  <div class="tbox">
   <div class="tcreeper" id="tCreeper"></div>
   <h1><span>LA COPIE</span><span>HANTÉE</span></h1>
-  <p class="tag">Ta copie de latin est hantée : chaque erreur est devenue un creeper. Explique-la, répare-la, et récupère tes points jusqu'à 20 / 20.</p>
+  <p class="tag">Ta copie de latin est hantée : chaque erreur est devenue un creeper. D'abord, apprends et comprends la leçon. Ensuite, chasse les creepers et récupère tes points jusqu'à 20 / 20.</p>
   <button class="btn green big" id="bPlay">▶ Jouer</button>
   <p class="mut small">Tu peux taper ou dicter au micro. Le son se règle sur la carte.</p>
  </div>
@@ -176,7 +193,8 @@ textarea#ch-in:focus{outline:3px solid #f4d35e}
  <header class="hud"><b class="logo">👻 La Copie hantée</b>
   <div class="gauge" id="gauge"><div class="gbar"><div class="gbase"></div><div class="gwon" id="gWon"></div></div><b id="gTxt">9 / 20</b></div>
   <span class="sp"></span>
-  <button class="btn" id="bTables">📜 Tables</button><button class="btn" id="bSound">🔊</button></header>
+  <button class="btn" id="bLib">📚 Bibliothèque</button><button class="btn" id="bRev">⏰ Révisions</button><button class="btn" id="bTables">📜 Tables</button><button class="btn" id="bSound">🔊</button></header>
+ <div class="lessons" id="lessons"></div>
  <div class="paper" id="paper"></div>
  <div class="portalRow"><div class="portal" id="portal"><div class="pglow"></div></div><div class="ptxt" id="pTxt"></div><button class="btn purple big" id="bBoss">⚔ Affronter le DT bis</button></div>
 </div>
@@ -195,6 +213,10 @@ textarea#ch-in:focus{outline:3px solid #f4d35e}
 <div id="tables" class="panel small">
  <div class="phead"><h2>📜 Les tables à réciter</h2><button class="btn xbtn" data-close="tables">✖</button></div>
  <div class="pbody"><p class="mut">Choisis une table. Tu la récites en la tapant, au micro, ou devant papa avec 👂 Papa écoute.</p><div id="tList" class="tlist"></div></div>
+</div>
+<div id="lib" class="panel">
+ <div class="phead"><h2>📚 La Bibliothèque de la leçon</h2><button class="btn xbtn" data-close="lib">✖</button></div>
+ <div class="pbody" id="libBody"></div>
 </div>
 <div id="toast"></div>
 
@@ -401,6 +423,214 @@ const BOSS_POOL={
   {fr:"Le maître d'école dirige les élèves.",parts:[["Le maître d'école (sujet)","magister"],["les élèves (datif avec praeesse)","discipulis"],["dirige","praeest"]]}]
 };
 
+/* ================= LA LEÇON : apprendre et comprendre AVANT de chasser les creepers =================
+   7 étapes. Chacune : 1. Comprendre (explication + exemple), 2. Mémoriser (retaper de mémoire, les indices
+   disparaissent en 4 passes, micro ou Papa écoute à la dernière passe), 3. Raisonner (petit test sans QCM).
+   Maîtrise = passe 4 réussie (ou Papa : par cœur / presque) + test avec au plus 1 erreur.
+   Ensuite, répétition espacée : la leçon revient à J+1, J+3, J+7, J+14. */
+const LESSONS=[
+ {id:"L1",n:1,title:"Les 6 cas et leurs fonctions",short:"les 6 cas",
+  expl:`En latin, la <b>fin du mot</b> (la terminaison) change selon sa <b>fonction</b> dans la phrase. Chaque fonction a son <b>cas</b>.
+   <table class="ltab"><tr><th>Cas</th><th>Fonction</th><th>Exemple</th></tr>
+   <tr><td>nominatif</td><td>sujet ou attribut du sujet</td><td><b>Domina</b> rosam dat.</td></tr>
+   <tr><td>vocatif</td><td>apostrophe (on appelle)</td><td><b>Domine</b>, veni !</td></tr>
+   <tr><td>accusatif</td><td>COD</td><td>Domina <b>rosam</b> dat.</td></tr>
+   <tr><td>génitif</td><td>complément du nom</td><td>la rose <b>de la maîtresse</b></td></tr>
+   <tr><td>datif</td><td>COI (à qui ?)</td><td>Domina <b>puellae</b> rosam dat.</td></tr>
+   <tr><td>ablatif</td><td>complément circonstanciel</td><td><b>in villa</b> (dans la maison)</td></tr></table>
+   <p class="lkey">⚠ Le nominatif n'est PAS le COD. Le COD, c'est l'accusatif.</p>`,
+  memo:"nominatif : sujet ou attribut du sujet • vocatif : apostrophe • accusatif : COD • génitif : complément du nom • datif : COI • ablatif : complément circonstanciel",
+  latin:[],
+  test:[
+   {k:"sens",p:"<b>Domina puellae rosam dat.</b> Quel est le cas de <b>rosam</b>, et pourquoi ?",g:[["accusatif","acc"],["cod","complement d objet direct","ce qu elle donne"]],crit:[0],need:2,hint:"rosam = ce que la maîtresse donne : c'est le COD."},
+   {k:"sens",p:"Le sujet d'un verbe se met à quel cas ?",g:[["nominatif"]],crit:[0],hint:"Domina (le sujet) est au…"},
+   {k:"sens",p:"Dans « la rose <b>de la maîtresse</b> », « de la maîtresse » est un complément du nom. Quel cas en latin ?",g:[["genitif"]],crit:[0],hint:"Complément du nom = …"},
+   {k:"sens",p:"Pour appeler quelqu'un (« Maître ! »), quel cas ?",g:[["vocatif"]],crit:[0],hint:"apostrophe = …"}]},
+ {id:"L2",n:2,title:"Une terminaison = plusieurs cas possibles",short:"une terminaison, plusieurs cas",
+  expl:`Une même terminaison peut correspondre à <b>plusieurs cas</b>. Il faut d'abord <b>toutes les lister</b>, puis la phrase choisit.
+   <table class="ltab"><tr><th>Fin</th><th>Possibilités</th><th>Exemple</th></tr>
+   <tr><td>-ae</td><td>génitif sg, datif sg, nominatif pl, vocatif pl</td><td>rosae, puellae</td></tr>
+   <tr><td>-is</td><td>datif pl, ablatif pl</td><td>rosis, dominis, equis</td></tr>
+   <tr><td>-i</td><td>génitif sg, nominatif pl, vocatif pl</td><td>domini, pueri, amici</td></tr></table>
+   <p class="lkey">Le <b>verbe</b> aide pour le nombre : <b>pueri sunt</b> (sunt = ils sont) → pueri est au pluriel → « les enfants sont ».</p>`,
+  memo:"une terminaison peut avoir plusieurs cas • -ae : génitif ou datif singulier, nominatif ou vocatif pluriel • -is : datif ou ablatif pluriel • -i : génitif singulier, nominatif ou vocatif pluriel • la phrase choisit",
+  latin:[],
+  test:[
+   {k:"cas",p:"Donne <b>toutes</b> les possibilités (cas et nombre) pour <b>rosis</b>.",cas:[["dat","pl"],["abl","pl"]],hint:"-is : deux possibilités, toutes deux au pluriel."},
+   {k:"cas",p:"Donne <b>toutes</b> les possibilités pour <b>puellae</b>.",cas:[["gen","sg"],["dat","sg"],["nom","pl"],["voc","pl"]],hint:"-ae : quatre possibilités."},
+   {k:"sens",p:"<b>Amici adsunt.</b> Pourquoi faut-il traduire « les amis sont présents » et pas « l'ami est présent » ?",g:[["adsunt","sunt","verbe","pluriel"]],crit:[0],hint:"Regarde la fin du verbe : -sunt = ils."}]},
+ {id:"L3",n:3,title:"La 1re déclinaison : rosa",short:"rosa",
+  expl:`<b>rosa, ae, f</b> : la rose. La carte d'identité donne le nominatif (rosa), le génitif (rosae) et le genre (f).
+   <table class="ltab"><tr><th></th><th>singulier</th><th>pluriel</th></tr>
+   <tr><td>nominatif</td><td>ros<b>a</b></td><td>ros<b>ae</b></td></tr><tr><td>vocatif</td><td>ros<b>a</b></td><td>ros<b>ae</b></td></tr>
+   <tr><td>accusatif</td><td>ros<b>am</b></td><td>ros<b>as</b></td></tr><tr><td>génitif</td><td>ros<b>ae</b></td><td>ros<b>arum</b></td></tr>
+   <tr><td>datif</td><td>ros<b>ae</b></td><td>ros<b>is</b></td></tr><tr><td>ablatif</td><td>ros<b>a</b></td><td>ros<b>is</b></td></tr></table>
+   <p class="lkey">Même modèle pour villa, puella, domina, statua…</p>`,
+  memo:"rosa rosa rosam rosae rosae rosa • rosae rosae rosas rosarum rosis rosis",
+  latin:["rosa","rosam","rosae","rosas","rosarum","rosis"],fiche:"rosa",
+  test:[
+   {k:"form",p:"<b>puella, ae, f</b> (la jeune fille) · accusatif singulier ?",a:["puellam"],hint:"Comme rosam."},
+   {k:"form",p:"<b>villa, ae, f</b> · génitif pluriel ?",a:["villarum"],hint:"Comme rosarum."},
+   {k:"cas",p:"<b>villam</b> : quel cas et quel nombre ?",cas:["acc","sg"],hint:"-am = …"},
+   {k:"form",p:"« dans la maison » : <b>in</b> + villa à l'ablatif singulier ?",a:["in villa","villa"],hint:"Ablatif singulier de rosa : rosa."}]},
+ {id:"L4",n:4,title:"La 2e déclinaison : dominus, puer, ager, templum",short:"dominus, puer, ager, templum",
+  expl:`<table class="ltab"><tr><th></th><th>dominus (m)</th><th>puer (m)</th><th>ager (m)</th><th>templum (n)</th></tr>
+   <tr><td>nom. sg</td><td>domin<b>us</b></td><td><b>puer</b></td><td><b>ager</b></td><td>templ<b>um</b></td></tr>
+   <tr><td>voc. sg</td><td>domin<b>e</b></td><td><b>puer</b></td><td><b>ager</b></td><td>templ<b>um</b></td></tr>
+   <tr><td>acc. sg</td><td>domin<b>um</b></td><td>puer<b>um</b></td><td>agr<b>um</b></td><td>templ<b>um</b></td></tr>
+   <tr><td>gén. sg</td><td>domin<b>i</b></td><td>puer<b>i</b></td><td>agr<b>i</b></td><td>templ<b>i</b></td></tr>
+   <tr><td>dat./abl. sg</td><td>domin<b>o</b></td><td>puer<b>o</b></td><td>agr<b>o</b></td><td>templ<b>o</b></td></tr>
+   <tr><td>nom./voc. pl</td><td>domin<b>i</b></td><td>puer<b>i</b></td><td>agr<b>i</b></td><td>templ<b>a</b></td></tr>
+   <tr><td>acc. pl</td><td>domin<b>os</b></td><td>puer<b>os</b></td><td>agr<b>os</b></td><td>templ<b>a</b></td></tr>
+   <tr><td>gén. pl</td><td>domin<b>orum</b></td><td>puer<b>orum</b></td><td>agr<b>orum</b></td><td>templ<b>orum</b></td></tr>
+   <tr><td>dat./abl. pl</td><td>domin<b>is</b></td><td>puer<b>is</b></td><td>agr<b>is</b></td><td>templ<b>is</b></td></tr></table>
+   <p class="lkey">Noms en <b>-er</b> (puer, ager, magister) : nominatif et vocatif singulier = le mot tel quel, sans -us ni -e. Le <b>génitif</b> montre le radical : pueri (le e reste), agri (le e tombe).<br>Le pluriel en <b>-a</b> est réservé aux <b>neutres</b> (templa). Les masculins font -i, -os.</p>`,
+  memo:"masculin : -us -e -um -i -o -o • -i -i -os -orum -is -is • neutre : -um -um -um -i -o -o • -a -a -a -orum -is -is • noms en -er : puer et ager au nominatif et au vocatif singulier, radical du génitif : pueri, agri",
+  latin:["us","e","um","i","o","os","orum","is","a","puer","ager","pueri","agri"],fiche:"puer",
+  test:[
+   {k:"form",p:"<b>puer, pueri</b> · vocatif singulier ?",a:["puer"],hint:"Nom en -er : pas de -e au vocatif."},
+   {k:"form",p:"<b>ager, agri</b> · accusatif singulier ?",a:["agrum"],hint:"Radical du génitif : agr-."},
+   {k:"form",p:"<b>servus, i, m</b> · vocatif singulier ?",a:["serve"],hint:"Comme domine."},
+   {k:"form",p:"<b>templum, i, n</b> · nominatif pluriel ?",a:["templa"],hint:"Neutre : -a."},
+   {k:"form",p:"<b>puer</b> · accusatif pluriel ?",a:["pueros"],hint:"Masculin : -os (pas -a)."},
+   {k:"sens",p:"Pourquoi le nominatif de puer n'est pas « puerus » ?",g:[["er","-er","nom en er"]],crit:[0],hint:"puer finit par… ?"}]},
+ {id:"L5",n:5,title:"Le verbe être (sum) et ses composés",short:"sum et ses composés",
+  expl:`<b>sum, es, esse, fui</b> : être → sum, es, est, sumus, estis, sunt.<br>Un composé = <b>préfixe + forme de sum</b> :
+   <table class="ltab"><tr><td>absum</td><td>je suis absent</td><td>ab + sunt = absunt</td></tr>
+   <tr><td>adsum</td><td>je suis présent</td><td>ad + est = adest</td></tr>
+   <tr><td>desum</td><td>je manque</td><td>de + es = dees</td></tr>
+   <tr><td>praesum + datif</td><td>je commande, je suis à la tête de</td><td>prae + est = praeest</td></tr>
+   <tr><td>prosum</td><td>je suis utile</td><td>prod devant voyelle : prodest</td></tr>
+   <tr><td>possum + infinitif</td><td>je peux</td><td>possunt vivere = ils peuvent vivre</td></tr></table>
+   <p class="lkey">⚠ praeest = il dirige. prodest = il est utile. Ne pas confondre.</p>`,
+  memo:"sum es est sumus estis sunt • absum : je suis absent • adsum : je suis présent • desum : je manque • praesum + datif : je commande • prosum : je suis utile • possum + infinitif : je peux",
+  latin:["sum","es","est","sumus","estis","sunt","absum","adsum","desum","praesum","prosum","possum"],fiche:"composes",
+  test:[
+   {k:"form",p:"Traduis : <b>vous êtes présents</b>",a:["adestis"],hint:"ad + estis."},
+   {k:"form",p:"Traduis : <b>il est utile</b>",a:["prodest"],hint:"pro devient prod devant une voyelle."},
+   {k:"form",p:"Traduis : <b>nous sommes absents</b>",a:["absumus"],hint:"ab + sumus."},
+   {k:"sens",p:"<b>Possunt vivere.</b> À quel mode est vivere, et pourquoi ?",g:[["infinitif"],["possum","possunt","pouvoir","peuvent"]],crit:[0],need:1,hint:"Après possum, le 2e verbe est à l'…"},
+   {k:"sens",p:"Que veut dire <b>praeest</b> ?",g:[["dirige","commande","est a la tete"]],crit:[0],forbid:["utile"],hint:"prae + est : être à la tête de."}]},
+ {id:"L6",n:6,title:"Les mots qui imposent un cas",short:"cum, in, praeesse",
+  expl:`Certains mots <b>choisissent le cas</b> du mot qui les suit ou qui les complète :
+   <table class="ltab"><tr><td><b>cum</b> + ablatif</td><td>avec</td><td>cum dominis = avec les maîtres</td></tr>
+   <tr><td><b>in</b> + ablatif</td><td>dans (lieu où l'on est)</td><td>in villa, in horto</td></tr>
+   <tr><td><b>praeesse</b> + datif</td><td>diriger, être à la tête de</td><td>magister discipulis praeest</td></tr>
+   <tr><td><b>prodesse</b> + datif</td><td>être utile à</td><td>servi dominis prosunt</td></tr></table>
+   <p class="lkey">-is peut être datif OU ablatif : regarde le mot qui commande. Après cum ou in → ablatif. Avec praeesse → datif.</p>`,
+  memo:"cum + ablatif : avec • in + ablatif : dans • praeesse + datif : diriger • prodesse + datif : être utile à • c'est ce mot qui choisit entre datif et ablatif",
+  latin:["cum","in","praeesse","prodesse"],
+  test:[
+   {k:"cas",p:"<b>cum servis</b> : servis est à quel cas et quel nombre ?",cas:["abl","pl"],hint:"cum + …"},
+   {k:"cas",p:"<b>in horto</b> : horto ?",cas:["abl","sg"],hint:"in + …"},
+   {k:"cas",p:"<b>Dominus servis praeest.</b> servis ?",cas:["dat","pl"],hint:"praeesse + …"},
+   {k:"sens",p:"Pourquoi <b>equis</b> est à l'ablatif dans « cum equis » ?",g:[["cum","avec"]],crit:[0],hint:"Quel mot est devant ?"}]},
+ {id:"L7",n:7,title:"La méthode : analyser et écrire en latin",short:"la méthode",
+  expl:`<b>Pour traduire (version)</b> : 1. je trouve le <b>verbe</b> et je regarde s'il est au pluriel. 2. je trouve le <b>sujet</b> au nominatif.
+   3. pour chaque autre mot : <b>cas, nombre</b>, et qui impose ce cas. 4. je traduis en gardant le <b>pluriel</b>.<br>
+   Exemple : <b>Pueri in villa sunt.</b> verbe sunt (ils sont) → sujet pueri (nominatif pluriel) → villa ablatif après in → « Les enfants sont dans la maison. »<br>
+   <b>Pour écrire en latin (thème)</b> : 1. la <b>fonction</b> en français. 2. le <b>cas</b> qui va avec. 3. la bonne <b>terminaison</b>.<br>
+   Exemple : « du maître » → complément du nom → génitif → domini.`,
+  memo:"version : 1 le verbe 2 le sujet au nominatif 3 les compléments : cas et nombre 4 je traduis en gardant le pluriel • thème : 1 la fonction 2 le cas 3 la terminaison",
+  latin:[],
+  test:[
+   {k:"form",p:"<b>Servi in horto sunt.</b> Étape 1 : écris le verbe.",a:["sunt"],hint:"Une forme de sum."},
+   {k:"form",p:"Étape 2 : écris le sujet (au nominatif).",a:["servi"],hint:"-i : nominatif pluriel, comme sunt est au pluriel."},
+   {k:"sens",tr:1,p:"Étape 4 : traduis <b>Servi in horto sunt.</b>",g:[["esclaves!"],["sont"],["dans"],["jardin"]],crit:[0,3],forbid:["l esclave"],hint:"Les esclaves… dans le jardin.",exp:"Les esclaves sont dans le jardin."},
+   {k:"cas",p:"Thème : « <b>les élèves</b> » est sujet. Quel cas et quel nombre ?",cas:["nom","pl"],hint:"Sujet = nominatif. Les = pluriel."},
+   {k:"form",p:"Écris « <b>les élèves</b> » (sujet) en latin. (discipulus, i, m)",a:["discipuli"],hint:"Nominatif pluriel : -i."}]}
+];
+const LREQ={c1:"L1",c2:"L4",c3:"L4",c5:"L5",c6:"L5",c11:"L6",c7:"L7",c8:"L7",c9:"L7",c10:"L7",c12:"L7"};
+LESSONS.forEach(L=>{FICHES[L.id]={title:L.title,txt:L.memo};});
+const SR_DAYS=[1,3,7,14,30];
+const today=()=>new Date().toISOString().slice(0,10);
+const addDays=(d,n)=>{const x=new Date(d+"T12:00:00");x.setDate(x.getDate()+n);return x.toISOString().slice(0,10);};
+function LS(id){S.L=S.L||{};return S.L[id]||(S.L[id]={pass:0,m:false});}
+const mastered=id=>!!(S.L&&S.L[id]&&S.L[id].m);
+function lessonOpen(L){return L.n===1||mastered(LESSONS[L.n-2].id);}
+function creeperOpen(c){const r=LREQ[c.id];return !r||mastered(r);}
+const dueLessons=()=>LESSONS.filter(L=>mastered(L.id)&&LS(L.id).next&&LS(L.id).next<=today());
+
+/* ---------- mémorisation : texte à trous qui se vident ---------- */
+const STOP=new Set(["le","la","les","de","du","des","ou","et","un","une","a","au","en","l","d","ce","qui","je","on"]);
+function memoKeys(L){return toks(L.memo).map((t,i)=>({t,i,ex:L.latin.includes(t)||/^-/.test(t)})).filter(k=>/[a-z0-9]/.test(k.t)&&(k.ex||!STOP.has(k.t)));}
+function memoView(L,pass){/* pass 1 : tout visible · 2 : 1 mot sur 3 caché · 3 : 2 sur 3 · 4 : tout caché */
+ if(pass>=4)return `<div class="memo hidden">🙈 De mémoire : tout le texte est caché.</div>`;
+ let k=0;const parts=L.memo.split(/(\s+)/).map(w=>{if(/^\s+$/.test(w)||w==="•"||w===":"||w==="+")return esc(w);const core=norm(w);if(!core||!/[a-z0-9]/.test(core)||STOP.has(core)&&!L.latin.includes(core))return esc(w);
+  k++;const hide=pass===2?k%3===0:pass===3?k%3!==1:false;return hide?`<span class="gap">${esc(w[0])}${"_".repeat(Math.max(2,w.length-1))}</span>`:esc(w);});
+ return `<div class="memo">${parts.join("").replace(/ • /g,"<br>")}</div>`;}
+function seqMatch(K,U){/* alignement : les mots-clés dans l'ordre ; latin exact, français tolérant */
+ const m=K.length,n=U.length,d=Array.from({length:m+1},()=>new Int16Array(n+1));
+ const eq=(k,u)=>k.ex?u===k.t||u==="-"+k.t.replace(/^-/,"")||u===k.t.replace(/^-/,""):tokEq(u,k.t,k.t.length<4);
+ for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)d[i][j]=eq(K[i-1],U[j-1])?d[i-1][j-1]+1:Math.max(d[i-1][j],d[i][j-1]);
+ const hit=new Set();let i=m,j=n;while(i&&j){if(eq(K[i-1],U[j-1])&&d[i][j]===d[i-1][j-1]+1){hit.add(i-1);i--;j--;}else if(d[i-1][j]>=d[i][j-1])i--;else j--;}return hit;}
+function checkMemo(L,v){const K=memoKeys(L);const U=toks(v.replace(/(^|\s)-(?=[a-z])/gi,"$1"));const hit=seqMatch(K,U);
+ const missEx=K.filter((k,i)=>k.ex&&!hit.has(i)).length,ratio=hit.size/K.length;
+ return {ok:missEx===0&&ratio>=0.9,ratio,hit,K,miss:K.filter((k,i)=>!hit.has(i)).map(k=>k.t)};}
+function memoFeedback(L,res){const miss=new Set([...res.K.keys()].filter(i=>!res.hit.has(i)).map(i=>res.K[i].i));let ti=-1;
+ return `<div class="memo">${L.memo.split(/(\s+)/).map(w=>{if(/^\s+$/.test(w))return w;const c=norm(w);if(!c)return esc(w);const n=toks(w).length;ti+=n;return miss.has(ti)?`<span class="miss">${esc(w)}</span>`:esc(w);}).join("").replace(/ • /g,"<br>")}</div>`;}
+
+/* ---------- déroulé d'une étape de leçon ---------- */
+function lessonSteps(L,review){if(review)return [{k:"memo",pass:4,rev:1,p:"Révision : retape la leçon de mémoire (ou appelle papa)."}];
+ const st=[{k:"read",p:"① Comprendre : lis l'explication et l'exemple. Puis touche « J'ai compris ➜ »."}];
+ const ps=["② Mémoriser · passe 1/4 : recopie la leçon.","② Mémoriser · passe 2/4 : des mots sont cachés, retape tout.","② Mémoriser · passe 3/4 : il ne reste que quelques mots, retape tout.","② Mémoriser · passe 4/4 : de mémoire ! (tu peux dicter, ou 👂 Papa écoute)"];
+ for(let p=Math.min(4,(LS(L.id).pass||0)+1);p<=4;p++)st.push({k:"memo",pass:p,p:ps[p-1]});
+ L.test.forEach(t=>st.push(Object.assign({},t,{test:1,p:"③ Raisonner : "+t.p})));return st;}
+function startLesson(id,review){const L=LESSONS.find(x=>x.id===id);if(!lessonOpen(L)){toast("Termine d'abord la leçon "+(L.n-1)+".");return;}
+ RUN={mode:"l",L,review:!!review,steps:lessonSteps(L,review),i:0,tries:0,errs:0,requeued:0,st:{}};openEnc();
+ $("eHead").textContent=(review?"⏰ Révision · ":"📖 Leçon "+L.n+" · ")+L.title;SND.click();renderStep();}
+function lessonScene(){const R=RUN,L=R.L,s=stepNow();const ph=!s?"":s.k==="read"?"Comprendre":s.k==="memo"?"Mémoriser":"Raisonner";
+ $("eScene").innerHTML=`<div class="bigface">${pix(["..kkkk..",".kccccK.","kcakkacK","kccccccK","kcKKKKcK",".kccccK.","..kkkk..","...kk..."],{k:"#6b3e1d",K:"#3a2410",c:"#e9c48f",a:"#fff"})}</div>
+  <div class="bubble"><b class="q">Le Magister · Leçon ${L.n} : ${esc(L.title)}</b>
+  <div class="lphase">${["Comprendre","Mémoriser","Raisonner"].map(x=>`<span class="${x===ph?"on":""}">${x}</span>`).join(" → ")}</div>
+  <div class="mut small">Pour débloquer : ${CREEPERS.filter(c=>LREQ[c.id]===L.id).map(c=>esc(c.name)).join(", ")||"la suite de la leçon"}.</div></div>`;}
+function lessonCtx(){const R=RUN,L=R.L,s=stepNow(),E=$("eCtx");if(!s){E.innerHTML="";return;}
+ if(s.k==="read")E.innerHTML=`<div class="lexpl">${L.expl}</div>`;
+ else if(s.k==="memo")E.innerHTML=R.fb||memoView(L,s.pass);
+ else E.innerHTML=s.ctx||"";}
+function lessonRender(s){const R=RUN;R.fb="";lessonScene();lessonCtx();$("ePrompt").innerHTML=s.p;
+ const f=$("ch-in");f.value="";
+ if(s.k==="read"){$("chWrap").classList.add("hide");$("eGo").classList.add("hide");$("eHint").classList.add("hide");$("eNext").classList.remove("hide");$("eNext").textContent="J'ai compris ➜";}
+ else{$("chWrap").classList.remove("hide");f.rows=s.k==="memo"?4:(s.k==="form"||s.k==="cas"?1:2);f.placeholder=s.k==="memo"?"retape la leçon ici…":s.k==="cas"?"ex : ablatif pluriel":s.k==="form"?"forme latine":"ta réponse, avec tes mots";
+  $("eGo").classList.remove("hide");$("eNext").classList.add("hide");$("eHint").classList.toggle("hide",s.k==="memo"&&s.pass===4);}
+ autoGrow();}
+function memoPassed(s,how){const R=RUN,L=R.L,ls=LS(L.id);
+ if(s.rev){ls.box=Math.min(SR_DAYS.length-1,(ls.box||0)+1);ls.next=addDays(today(),SR_DAYS[ls.box]);save();SND.level();say(`✔ Révision réussie${how||""} ! Prochaine révision dans ${SR_DAYS[ls.box]} jours.`,"ok");R.i++;setTimeout(()=>{if(RUN===R)renderStep();},1200);return;}
+ ls.pass=Math.max(ls.pass||0,s.pass);save();SND.anvil();say(`✔ Passe ${s.pass} réussie${how||""} !`,"ok");$("eGo").disabled=true;R.i++;setTimeout(()=>{if(RUN===R)renderStep();},1000);}
+function lessonCheck(s,v){const R=RUN,L=R.L;
+ if(s.k==="memo"){const r=checkMemo(L,v);
+  if(r.ok){R.fb="";return memoPassed(s,r.ratio<1?" (le sens y est, quelques petits mots en moins)":"");}
+  SND.ko();R.fb=memoFeedback(L,r);lessonCtx();say(`✖ ${r.miss.length} mot${r.miss.length>1?"s":""} manquant${r.miss.length>1?"s":""} ou faux (en rouge). Relis-les et retape.`,"ko");
+  if(s.rev){const ls=LS(L.id);ls.box=0;ls.next=addDays(today(),1);save();}
+  return;}
+ const r=evalStep(s,v);
+ if(r.ok){SND[s.k==="form"?"anvil":"ok"]();say((s.k==="form"?"✔ Forgé !":"✔ Bien raisonné !")+(s.tr&&s.exp?`<br>« ${esc(s.exp)} »`:""),"ok");$("eGo").disabled=true;R.i++;setTimeout(()=>{if(RUN===R)renderStep();},s.tr?1400:850);return;}
+ R.tries++;if(R.tries===1){R.errs++;if(R.requeued<6){R.steps.push(Object.assign({},s,{again:1}));R.requeued++;}}SND.ko();
+ say("✖ "+koMsg(s,r)+(R.tries===1?" Réessaie ou touche 💡. Cette question reviendra à la fin.":""),"ko");
+ if(R.tries>=2&&s.hint){const e=$("eRule");e.innerHTML="<b>📘 Rappel :</b> "+esc(s.hint);e.classList.remove("hide");}
+ if(R.tries>=3&&s.k==="form")say(`✖ La bonne forme est <b>${esc(s.a[0])}</b>. Tape-la.`,"ko");
+ if(R.tries>=3&&s.k==="cas"){const W=Array.isArray(s.cas[0])?s.cas:[s.cas];say(`✖ C'est : <b>${W.map(w=>CASES[w[0]]+" "+(w[1]==="sg"?"singulier":"pluriel")).join(", ")}</b>. Tape-le.`,"ko");}}
+function lessonEnd(){const R=RUN,L=R.L,ls=LS(L.id);$("chWrap").classList.add("hide");$("eGo").classList.add("hide");$("eHint").classList.add("hide");$("ePrompt").textContent="";
+ $("eNext").classList.remove("hide");
+ if(R.review){$("eNext").textContent="Retour à la copie ➜";return;}
+ if(R.errs<=1){const first=!ls.m;ls.m=true;ls.box=0;ls.next=addDays(today(),SR_DAYS[0]);save();SND.level();
+  const un=CREEPERS.filter(c=>LREQ[c.id]===L.id);
+  say(`🏅 Leçon ${L.n} maîtrisée !${first&&un.length?` Creeper${un.length>1?"s":""} débloqué${un.length>1?"s":""} : ${un.map(c=>esc(c.name)).join(", ")}.`:""}${first&&L.n<7?` Leçon ${L.n+1} ouverte.`:""} Elle reviendra en révision demain.`,"ok");
+  $("eNext").textContent="Retour à la copie ➜";}
+ else{SND.ko();say(`Pas encore maîtrisée : ${R.errs} erreurs au test (il en faut 1 au plus). On refait le test ③.`,"ko");
+  $("eNext").textContent="Refaire le test ➜";R.redo=true;}}
+function lessonNext(){const R=RUN;if(R.redo){R.redo=false;R.steps=lessonSteps(R.L).filter(s=>s.test);R.steps=shuffle(R.steps);R.i=0;R.errs=0;R.requeued=0;renderStep();return true;}return false;}
+function lessonPapa(g){const R=RUN,s=stepNow();if(!s||s.k!=="memo")return;
+ if(g==="revoir"){SND.ko();say("👂 Papa a dit : à revoir. Relis la leçon et recommence.","ko");if(s.rev){const ls=LS(R.L.id);ls.box=0;ls.next=addDays(today(),1);save();}return;}
+ memoPassed(s,g==="coeur"?" : papa a dit par cœur":" : papa a dit presque");}
+
+/* ---------- bibliothèque ---------- */
+function renderLib(sel){const B=$("libBody");const open=LESSONS.filter(lessonOpen);const cur=LESSONS.find(L=>L.id===sel)||open[open.length-1];
+ B.innerHTML=`<div class="libnav">${LESSONS.map(L=>`<button class="btn ${L===cur?"yellow":""}" data-l="${L.id}" ${lessonOpen(L)?"":"disabled"}>${lessonOpen(L)?"":"🔒 "}${L.n}. ${esc(L.short)}${mastered(L.id)?" ✔":""}</button>`).join("")}<button class="btn ${sel==="voc"?"yellow":""}" data-l="voc">📒 vocabulaire</button></div>`+
+  (sel==="voc"?`<div class="lexpl"><table class="ltab">${VOC.map(([a,b])=>`<tr><td><b>${esc(a)}</b></td><td>${esc(b)}</td></tr>`).join("")}</table></div>`
+  :`<h3>Leçon ${cur.n} · ${esc(cur.title)}</h3><div class="lexpl">${cur.expl}</div><div class="memo"><b>À savoir par cœur :</b><br>${esc(cur.memo).replace(/ • /g,"<br>")}</div>`);
+ B.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{SND.click();renderLib(b.dataset.l);});}
+
 /* ================= VOIX : réciter au micro, et « Papa écoute » (partagé entre les jeux) =================
    Micro : chaque morceau reconnu est AJOUTÉ à la réponse (jamais tout remplacé). Chaque mot est une
    pastille : on la touche pour le corriger ou l'effacer. Après la vérification, on dit seulement
@@ -582,19 +812,24 @@ function particles(el,col,n){const r=el.getBoundingClientRect(),w=document.creat
 const won=()=>CREEPERS.reduce((a,c)=>a+(S.done[c.id]?c.pts:0),0);
 function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id===id));}
 function renderGauge(){const w=won();$("gWon").style.width=(w/20*100)+"%";$("gTxt").textContent=fr(9+w)+" / 20";}
-function renderMap(){const P=$("paper");P.innerHTML="";
+function renderMap(){renderLessons();const P=$("paper");P.innerHTML="";
  for(const ex of [1,2,3,4]){const z=document.createElement("div");z.className="zone";const list=CREEPERS.filter(c=>c.ex===ex);
   const lost=list.reduce((a,c)=>a+c.pts,0),back=list.reduce((a,c)=>a+(S.done[c.id]?c.pts:0),0);
   z.innerHTML=`<h3>${EXN[ex].name}</h3><span class="znote">${EXN[ex].note}</span><div class="mut small">Points perdus : ${fr(lost)} · récupérés : <b>${fr(back)}</b></div><div class="creepers"></div>`;
-  list.forEach(c=>{const d=document.createElement("div");d.className="cr"+(S.done[c.id]?" done":"");d.dataset.id=c.id;
-   d.innerHTML=`<div class="face">${creeper(S.done[c.id])}</div><span class="his">${esc(S.done[c.id]?c.exp:c.his)}</span><span class="nt">${esc(c.notion)}</span><span class="pts">${S.done[c.id]?"✔ +":""}${fr(c.pts)} pt</span>`;
-   d.onclick=()=>{SND.click();startCreeper(c.id);};z.querySelector(".creepers").appendChild(d);});
+  list.forEach(c=>{const d=document.createElement("div");const lk=!creeperOpen(c);d.className="cr"+(S.done[c.id]?" done":"")+(lk?" lock":"");d.dataset.id=c.id;
+   d.innerHTML=`<div class="face">${creeper(S.done[c.id])}</div><span class="his">${esc(S.done[c.id]?c.exp:c.his)}</span><span class="nt">${lk?"🔒 apprends d'abord : leçon "+LESSONS.find(L=>L.id===LREQ[c.id]).n:esc(c.notion)}</span><span class="pts">${S.done[c.id]?"✔ +":""}${fr(c.pts)} pt</span>`;
+   d.onclick=()=>{if(!creeperOpen(c)){SND.ko();toast("Apprends d'abord la leçon "+LESSONS.find(L=>L.id===LREQ[c.id]).n+" : "+LESSONS.find(L=>L.id===LREQ[c.id]).short);return;}SND.click();startCreeper(c.id);};z.querySelector(".creepers").appendChild(d);});
   P.appendChild(z);}
  const left=CREEPERS.filter(c=>!S.done[c.id]).length;$("portal").classList.toggle("open",!left);
  const best=S.boss.length?Math.max(...S.boss.map(b=>b.score)):null;
  $("pTxt").innerHTML=left?`Le portail du <b>DT bis</b> s'ouvre quand les ${CREEPERS.length} creepers ont explosé. Encore <b>${left}</b>.`:`Le portail est ouvert ! Un DT tout neuf t'attend, noté sur 20.`+(best!=null?` Meilleure note : <b>${fr(best)} / 20</b>.`:"");
  $("bBoss").disabled=!!left;renderGauge();}
 
+function renderLessons(){const E=$("lessons");const due=dueLessons();
+ E.innerHTML=`<div class="ltitle">📖 La leçon d'abord</div>`+LESSONS.map(L=>{const op=lessonOpen(L),m=mastered(L.id),d=due.includes(L);
+  return `<div class="lstone ${m?"m":op?"open":"lock"}${d?" due":""}" data-l="${L.id}"><b>${m?"✔":op?"▶":"🔒"} ${L.n}</b><span>${esc(L.short)}</span>${d?"<i>⏰ à réviser</i>":m?"<i>maîtrisée</i>":op?`<i>${LS(L.id).pass?"passe "+LS(L.id).pass+"/4":"à apprendre"}</i>`:""}</div>`;}).join("");
+ E.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{const L=LESSONS.find(x=>x.id===b.dataset.l);if(!lessonOpen(L)){SND.ko();toast("Termine d'abord la leçon "+(L.n-1)+".");return;}startLesson(L.id,dueLessons().includes(L));});
+ $("bRev").textContent="⏰ Révisions ("+due.length+")";$("bRev").disabled=!due.length;}
 /* ---------- rencontre (creeper, boss, table) ---------- */
 let RUN=null;
 function openEnc(){$("enc").classList.add("on");$("eMsg").textContent="";$("eMsg").className="msg";}
@@ -603,14 +838,14 @@ function startCreeper(id,at){const C=CREEPERS.find(c=>c.id===id);RUN={mode:"c",C
  openEnc();$("eHead").textContent="🟩 "+C.name+(S.done[id]?" (entraînement)":"");SND.hiss();renderStep();}
 function stepNow(){return RUN.steps[RUN.i];}
 function pipsHTML(){return RUN.steps.map((s,i)=>`<i class="${i<RUN.i?"ok":i===RUN.i?"cur":""}${s.twin?" tw":""}"></i>`).join("");}
-function renderScene(){const R=RUN;
+function renderScene(){const R=RUN;if(R.mode==="l")return lessonScene();
  if(R.mode==="c"){const C=R.C;$("eScene").innerHTML=`<div class="bigface" id="bigFace">${creeper(false)}</div><div class="bubble"><b class="q">Sujet : ${esc(C.q)}</b>Sur ta copie : <span class="hisw">${esc(C.his)}</span><div class="mut small">Notion : ${esc(C.notion)} · ${fr(C.pts)} point à récupérer</div></div>`;}
  else if(R.mode==="b"){const lost=R.max-R.score-R.lost;$("eScene").innerHTML=`<div class="golem" id="bigFace">${golem()}</div><div class="bubble"><b class="q">Le Golem du DT · ${esc(R.part())}</b><div class="bossbar"><div class="hp"><i style="width:${(20-R.score)/20*100}%"></i></div><b>Note : ${fr(R.score)} / 20</b></div><div class="mut small">Chaque bonne réponse lui retire des points de vie. Pas de deuxième essai : c'est un vrai DT.</div></div>`;}
  else $("eScene").innerHTML=`<div class="bigface">${pix(["kkkkkkkk","kccccccK","kcaaaacK","kccccccK","kcaaaacK","kccccccK","kcaaaacK","kkkkkkkk"],{k:"#6b3e1d",K:"#6b3e1d",c:"#f3e6c4",a:"#9b8a66",b:"#000"})}</div><div class="bubble"><b class="q">${esc(TABLES[R.k].title)}</b>${TABLES[R.k].kind==="decl"?"Récite toute la table : du nominatif à l'ablatif, au singulier puis au pluriel.":"Récite toutes les formes dans l'ordre"+(TABLES[R.k].kind==="comp"?", chacune avec son sens.":".")}</div>`;}
 function blocksHTML(words,st,cur){return `<div class="sent">${words.map((w,i)=>{const b=st.blocks[i];return `<div class="blk ${b?b.cls:""}${i===cur?" cur":""}">${esc(w)}${b?`<small>${esc(b.lab)}</small>`:""}</div>`;}).join("")}</div>
  <div class="legend"><span><i style="background:#c9a227"></i>nominatif</span><span><i style="background:#b23a32"></i>accusatif</span><span><i style="background:#7b3fb5"></i>génitif</span><span><i style="background:#2f6fd0"></i>datif</span><span><i style="background:#2e8b3a"></i>ablatif</span><span><i style="background:#4a4a4a"></i>verbe</span></div>`;}
 function villaHTML(n){let h="";for(let i=0;i<n;i++)h+=`<i class="${i>=n-12&&n>=36?"roof":""}" style="grid-column:${i%12+1};grid-row:${6-Math.floor(i/12)}"></i>`;return `<div class="vlab">🏠 La villa se construit à chaque bonne réponse</div><div class="villa on">${h}</div>`;}
-function renderCtx(){const R=RUN,s=stepNow(),E=$("eCtx");
+function renderCtx(){const R=RUN,s=stepNow(),E=$("eCtx");if(R.mode==="l")return lessonCtx();
  if(R.mode==="t"){E.innerHTML=R.res||"";return;}
  if(R.mode==="b"){E.innerHTML=s&&s.ctx?s.ctx:"";return;}
  const C=R.C,st=R.st;
@@ -627,6 +862,7 @@ function renderCtx(){const R=RUN,s=stepNow(),E=$("eCtx");
  else if(C.ctx==="theme"){const cur=s&&s.slot;E.innerHTML=`<div class="theme">${C.fr.map((f,i)=>{const forged=st.slots[i],bad=C.bad[i]!=null&&!forged;
    return `<div class="fr">${esc(f)}</div><div class="la ${forged||!bad?"ing":"bad"}${cur===i?" cur":""}">${forged||!bad?esc(C.la[i]):`<s>${esc(C.bad[i])}</s>`}</div>`;}).join("")}</div>`+(st.forged&&st.forged.length?`<div class="conj" style="margin-top:6px">${st.forged.map(f=>`<span class="ing">${esc(f)}</span>`).join("")}</div>`:"");}}
 function renderStep(){const R=RUN,s=stepNow();if(!s)return finish();R.tries=0;$("chWrap").classList.remove("hide");
+ if(R.mode==="l"){$("ePips").innerHTML=pipsHTML();$("eRule").classList.add("hide");$("eMsg").textContent="";$("eMsg").className="msg";$("eGo").disabled=false;return lessonRender(s);}
  $("ePips").innerHTML=R.mode==="t"?"":pipsHTML();renderScene();renderCtx();
  $("ePrompt").innerHTML=(s.twin?"<span style=\"color:#7b3fb5\">◆ </span>":"")+s.p;
  const f=$("ch-in");f.value="";f.placeholder=s.k==="cas"?"ex : ablatif pluriel":s.k==="form"?"forme latine":s.tr?"ta traduction":"ta réponse, avec tes mots";
@@ -653,6 +889,7 @@ function apply(s,v){const R=RUN,st=R.st;if(R.mode!=="c")return;const C=R.C;
   if(s.tr&&!s.twin)st.trad=C.exp;}}
 function check(){const R=RUN;if(!R)return;const s=stepNow();const v=$("ch-in").value.trim();if(!v){say("Écris ta réponse d'abord.","near");return;}
  if(R.mode==="t")return checkTable(v);
+ if(R.mode==="l")return lessonCheck(s,v);
  if(R.mode==="b")return bossCheck(s,v);
  const r=evalStep(s,v);
  if(r.ok){SND[s.k==="form"?"anvil":"ok"]();apply(s,v);
@@ -667,8 +904,8 @@ function check(){const R=RUN;if(!R)return;const s=stepNow();const v=$("ch-in").v
  if(R.tries>=3&&s.k==="cas")say(`✖ C'est <b>${CASES[s.cas[0]]} ${s.cas[1]==="sg"?"singulier":"pluriel"}</b>. Tape-le, en lisant la règle.`,"ko");
  if(R.tries>=3&&s.k==="sens"&&s.hint)say("✖ "+koMsg(s,r)+" Indice : "+esc(s.hint),"ko");}
 function hint(){const R=RUN;if(!R||R.mode==="b")return;const s=stepNow();if(R.mode==="t"){say("Commence par le nominatif singulier, puis descends jusqu'à l'ablatif. Ensuite le pluriel.","near");return;}
- SND.click();say("💡 "+(s.hint||s.rule||""),"near");}
-function finish(){const R=RUN;if(R.mode==="b")return bossEnd();const C=R.C,first=!S.done[C.id];S.done[C.id]=true;save();
+ SND.click();say("💡 "+(s.hint||s.rule||(s.k==="memo"?"Relis les mots en rouge, ou ouvre la 📚 Bibliothèque. Tu peux aussi revenir à une passe plus facile en rouvrant la leçon.":"")),"near");}
+function finish(){const R=RUN;if(R.mode==="b")return bossEnd();if(R.mode==="l")return lessonEnd();const C=R.C,first=!S.done[C.id];S.done[C.id]=true;save();
  const bf=$("bigFace");bf.classList.add("boom");SND.boom();particles(bf);
  say(first?`💥 Creeper explosé ! <b>+${fr(C.pts)} point</b> récupéré. Note : ${fr(9+won())} / 20.`:"💥 Creeper explosé encore une fois. Bien révisé !","ok");
  $("chWrap").classList.add("hide");$("eGo").classList.add("hide");$("eHint").classList.add("hide");$("ePrompt").textContent="";$("eNext").classList.remove("hide");$("eNext").textContent="Retour à la copie ➜";
@@ -731,15 +968,19 @@ $("bSound").onclick=()=>{S.mute=!S.mute;save();$("bSound").textContent=S.mute?"�
 $("bTables").onclick=()=>{SND.click();renderTables();$("tables").classList.add("on");};
 document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>{$(b.dataset.close).classList.remove("on");});
 $("bBoss").onclick=()=>startBoss(false);
+$("bLib").onclick=()=>{SND.click();renderLib();$("lib").classList.add("on");};
+$("bRev").onclick=()=>{const d=dueLessons();if(d.length)startLesson(d[0].id,true);};
 $("eClose").onclick=()=>{SND.click();closeEnc();};
 $("eGo").onclick=check;$("eHint").onclick=hint;
-$("eNext").onclick=()=>{if(!RUN)return;if(RUN.mode==="c"&&RUN.i>=RUN.steps.length)return closeEnc();if(RUN.mode==="b"&&RUN.i>=RUN.steps.length&&!$("eGo").classList.contains("hide"))return closeEnc();
+$("eNext").onclick=()=>{if(!RUN)return;if(RUN.mode==="l"){const s=stepNow();if(s&&s.k==="read"){RUN.i++;return renderStep();}if(RUN.i>=RUN.steps.length){if(lessonNext())return;return closeEnc();}return renderStep();}if(RUN.mode==="c"&&RUN.i>=RUN.steps.length)return closeEnc();if(RUN.mode==="b"&&RUN.i>=RUN.steps.length&&!$("eGo").classList.contains("hide"))return closeEnc();
  if(RUN.mode==="b"&&$("eCtx").querySelector(".score"))return closeEnc();renderStep();};
 $("ch-in").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();if(!$("eGo").classList.contains("hide")&&!$("eGo").disabled)check();else if(!$("eNext").classList.contains("hide"))$("eNext").click();}});
 $("ch-in").addEventListener("input",autoGrow);
-VOIX.attach("ch",{field:$("ch-in"),anchor:$("chWrap"),fiche:()=>RUN&&RUN.mode==="t"?RUN.k:null,papaOK:()=>!!(RUN&&RUN.mode==="t"),canRedo:()=>false,papa:(g,f)=>tablePapa(g,f),retry:()=>{}});
-window.__ch={S:()=>S,RUN:()=>RUN,CREEPERS,TABLES,checkSens,checkForm,checkCas,parseCas,startCreeper,startBoss,openTable,renderMap,won,
- test:{forge(){show("map");renderMap();startCreeper("c2",1);},explain(){show("map");renderMap();startCreeper("c2",0);},chantierWhy(){show("map");renderMap();startCreeper("c7",5);},
+const papaFiche=()=>{if(!RUN)return null;if(RUN.mode==="t")return RUN.k;if(RUN.mode==="l"){const s=stepNow();if(s&&s.k==="memo"&&s.pass===4)return RUN.L.id;}return null;};
+VOIX.attach("ch",{field:$("ch-in"),anchor:$("chWrap"),fiche:papaFiche,papaOK:()=>!!papaFiche(),canRedo:()=>false,papa:(g,f)=>RUN&&RUN.mode==="l"?lessonPapa(g):tablePapa(g,f),retry:()=>{}});
+window.__ch={S:()=>S,LESSONS,LREQ,startLesson,checkMemo,memoKeys,mastered,dueLessons,RUN:()=>RUN,CREEPERS,TABLES,checkSens,checkForm,checkCas,parseCas,startCreeper,startBoss,openTable,renderMap,won,
+ test:{unlockAll(){LESSONS.forEach(L=>{const l=LS(L.id);l.m=true;l.pass=4;l.next=addDays(today(),1);});save();renderMap();},lecon(){show("map");renderMap();startLesson("L1");RUN.i=2;renderStep();},leconTest(){show("map");this.unlockAll();startLesson("L1");RUN.i=RUN.steps.findIndex(s=>s.test);renderStep();},
+  forge(){show("map");renderMap();startCreeper("c2",1);},explain(){show("map");renderMap();startCreeper("c2",0);},chantierWhy(){show("map");renderMap();startCreeper("c7",5);},
   chantierTrad(){show("map");renderMap();startCreeper("c7",7);},boss(){show("map");renderMap();startBoss(true);RUN.i=3;renderStep();},
   papa(){show("map");renderMap();openTable("puer");setTimeout(()=>{document.querySelector("#vx-ch .vxpapa").click();document.getElementById("vxP1").click();},150);}}};
 
