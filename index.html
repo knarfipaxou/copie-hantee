@@ -152,6 +152,19 @@ textarea#ch-in:focus{outline:3px solid #f4d35e}
 .libnav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.libnav .btn{font-size:13px;min-height:38px;padding:4px 10px}
 #lib h3{margin:6px 0}
 
+/* traductions françaises à côté des formes latines */
+.trfr{display:block;font-size:.8em;font-weight:600;font-style:italic;color:#5c4a1f;line-height:1.2;margin-top:1px}
+.pair{display:inline-block;vertical-align:top}
+#ePrompt .trfr,#eMsg .trfr{margin-top:4px}
+.ltab .trfr{font-size:.78em;color:#6a5428}
+.anvil .trfr{font-size:11px;font-weight:600;font-style:italic;text-shadow:none;line-height:1.15;margin-top:2px}
+.anvil .ing .trfr{color:#3a2a00}.anvil .c .trfr,.anvil .cur .trfr{color:#4a3a18}
+.conj .trfr{display:block;font-size:11px;font-weight:600;font-style:italic;text-shadow:none;color:#3a2a00}
+.trfr.later{display:none}
+.revealed .trfr.later,#eMsg .trfr.later{display:block}
+.his .trfr,.cr .trfr{font-size:11px;color:#4a3a18;text-shadow:none;font-weight:600}
+.anvil div{min-height:42px}
+
 /* VOIX : micro et Papa écoute */
 .vx{margin:6px 0;font-size:15px}
 .vxhide{display:none!important}
@@ -162,6 +175,8 @@ textarea#ch-in:focus{outline:3px solid #f4d35e}
 .vxmic.rec,.vxrmic.rec{background:#d63b3b;border-color:#8c1f1f;color:#fff;animation:vxpulse 1s infinite}
 @keyframes vxpulse{50%{box-shadow:0 0 0 6px rgba(214,59,59,.3)}}
 .vxpapa{background:#ffe7a8;border-color:#a8781a}
+.vxlang{background:#f4f1e8;border-color:#5a4a28;font-size:16px;min-width:132px;min-height:52px;padding:8px 10px}
+.vxlang[data-lang="es-ES"]{background:#fde8d0;border-color:#8a3b12}
 .vxst{font-weight:700;font-size:14px}.vxst.vxon{color:#1d6fd0}.vxst.vxwarn{color:#b55d00}
 .vxlive{font-style:italic;color:#666;min-height:0;margin:4px 0}
 .vxchips{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}
@@ -252,17 +267,77 @@ const IOSAU={get:null,el:null,unlocked:false,
             cas (cas + nombre), info (règle). Les jumelles = même piège avec un autre mot. */
 const CASES={nom:"nominatif",voc:"vocatif",acc:"accusatif",gen:"génitif",dat:"datif",abl:"ablatif"};
 const ORDER=["nom","voc","acc","gen","dat","abl"];
+function trfr(fr,later){return fr?`<span class="trfr${later?" later":""}">${fr}</span>`:"";}
+function pair(la,fr,later){return `<span class="pair">${la}${trfr(fr,later)}</span>`;}
+function formFr(tab,num,i){const T=TABLES[tab];const L=T&&T[num==="sg"?"frsg":"frpl"];return L?L[i]:"";}
 const TABLES={
- rosa:{title:"rosa, ae, f : la rose",kind:"decl",sg:["rosa","rosa","rosam","rosae","rosae","rosa"],pl:["rosae","rosae","rosas","rosarum","rosis","rosis"]},
- dominus:{title:"dominus, i, m : le maître",kind:"decl",sg:["dominus","domine","dominum","domini","domino","domino"],pl:["domini","domini","dominos","dominorum","dominis","dominis"]},
- puer:{title:"puer, pueri, m : l'enfant",kind:"decl",sg:["puer","puer","puerum","pueri","puero","puero"],pl:["pueri","pueri","pueros","puerorum","pueris","pueris"]},
- ager:{title:"ager, agri, m : le champ",kind:"decl",sg:["ager","ager","agrum","agri","agro","agro"],pl:["agri","agri","agros","agrorum","agris","agris"]},
- templum:{title:"templum, i, n : le temple",kind:"decl",sg:["templum","templum","templum","templi","templo","templo"],pl:["templa","templa","templa","templorum","templis","templis"]},
+ rosa:{title:"rosa, ae, f : la rose",kind:"decl",sg:["rosa","rosa","rosam","rosae","rosae","rosa"],pl:["rosae","rosae","rosas","rosarum","rosis","rosis"],
+  frsg:["la rose","la rose (on l'appelle)","la rose (COD)","de la rose","à la rose","(avec, dans) la rose"],
+  frpl:["les roses","les roses (on les appelle)","les roses (COD)","des roses","aux roses","(avec, dans) les roses"]},
+ dominus:{title:"dominus, i, m : le maître",kind:"decl",sg:["dominus","domine","dominum","domini","domino","domino"],pl:["domini","domini","dominos","dominorum","dominis","dominis"],
+  frsg:["le maître","ô maître !","le maître (COD)","du maître","au maître","(avec, dans) le maître"],
+  frpl:["les maîtres","ô maîtres !","les maîtres (COD)","des maîtres","aux maîtres","(avec, dans) les maîtres"]},
+ puer:{title:"puer, pueri, m : l'enfant",kind:"decl",sg:["puer","puer","puerum","pueri","puero","puero"],pl:["pueri","pueri","pueros","puerorum","pueris","pueris"],
+  frsg:["l'enfant","l'enfant (on l'appelle)","l'enfant (COD)","de l'enfant","à l'enfant","(avec, dans) l'enfant"],
+  frpl:["les enfants","les enfants (on les appelle)","les enfants (COD)","des enfants","aux enfants","(avec, dans) les enfants"]},
+ ager:{title:"ager, agri, m : le champ",kind:"decl",sg:["ager","ager","agrum","agri","agro","agro"],pl:["agri","agri","agros","agrorum","agris","agris"],
+  frsg:["le champ","le champ (on l'appelle)","le champ (COD)","du champ","au champ","(avec, dans) le champ"],
+  frpl:["les champs","les champs (on les appelle)","les champs (COD)","des champs","aux champs","(avec, dans) les champs"]},
+ templum:{title:"templum, i, n : le temple",kind:"decl",sg:["templum","templum","templum","templi","templo","templo"],pl:["templa","templa","templa","templorum","templis","templis"],
+  frsg:["le temple","le temple","le temple (COD)","du temple","au temple","(avec, dans) le temple"],
+  frpl:["les temples","les temples","les temples (COD)","des temples","aux temples","(avec, dans) les temples"]},
  sum:{title:"sum, es, esse, fui : être",kind:"conj",forms:["sum","es","est","sumus","estis","sunt"],fr:["je suis","tu es","il est","nous sommes","vous êtes","ils sont"]},
  possum:{title:"possum, potes, posse : pouvoir",kind:"conj",forms:["possum","potes","potest","possumus","potestis","possunt"],fr:["je peux","tu peux","il peut","nous pouvons","vous pouvez","ils peuvent"]},
  composes:{title:"Les composés de sum",kind:"comp",forms:["absum","adsum","desum","praesum","prosum","possum"],fr:["je suis absent","je suis présent","je manque","je commande, je suis à la tête de","je suis utile","je peux"],
   keys:[["absent"],["present"],["manque"],["commande","dirige","tete"],["utile"],["peux","pouvoir"]]}
 };
+/* glossaire : forme ou phrase latine → français (niveau 5e). Les formes ambiguës ont toutes leurs lectures. */
+const GLOSE={
+ "rosa":"la rose","rosam":"la rose (COD)","rosae":"de la rose, à la rose, ou les roses","rosas":"les roses (COD)","rosarum":"des roses","rosis":"aux roses, ou (avec, dans) les roses",
+ "dominus":"le maître","domine":"ô maître !","dominum":"le maître (COD)","domini":"du maître, ou les maîtres","domino":"au maître, ou (avec, dans) le maître","dominos":"les maîtres (COD)","dominorum":"des maîtres","dominis":"aux maîtres, ou (avec, dans) les maîtres",
+ "puer":"l'enfant","puerum":"l'enfant (COD)","pueri":"de l'enfant, ou les enfants","puero":"à l'enfant, ou (avec, dans) l'enfant","pueros":"les enfants (COD)","puerorum":"des enfants","pueris":"aux enfants, ou (avec, dans) les enfants",
+ "ager":"le champ","agrum":"le champ (COD)","agri":"du champ, ou les champs","agro":"au champ, ou (avec, dans) le champ","agros":"les champs (COD)","agrorum":"des champs","agris":"aux champs, ou (avec, dans) les champs",
+ "templum":"le temple","templi":"du temple","templo":"au temple, ou (avec, dans) le temple","templa":"les temples","templorum":"des temples","templis":"aux temples, ou (avec, dans) les temples",
+ "sum":"je suis","es":"tu es","est":"il est","sumus":"nous sommes","estis":"vous êtes","sunt":"ils sont",
+ "absum":"je suis absent","abes":"tu es absent","abest":"il est absent","absumus":"nous sommes absents","abestis":"vous êtes absents","absunt":"ils sont absents",
+ "adsum":"je suis présent","ades":"tu es présent","adest":"il est présent","adsumus":"nous sommes présents","adestis":"vous êtes présents","adsunt":"ils sont présents",
+ "desum":"je manque","dees":"tu manques","deest":"il manque","desumus":"nous manquons","deestis":"vous manquez","desunt":"ils manquent",
+ "praesum":"je commande","praees":"tu commandes","praeest":"il dirige, il commande","praesumus":"nous commandons","praeestis":"vous commandez","praesunt":"ils commandent, ils sont à la tête de",
+ "prosum":"je suis utile","prodes":"tu es utile","prodest":"il est utile","prosumus":"nous sommes utiles","prodestis":"vous êtes utiles","prosunt":"ils sont utiles",
+ "possum":"je peux","potes":"tu peux","potest":"il peut","possumus":"nous pouvons","potestis":"vous pouvez","possunt":"ils peuvent",
+ "ire":"aller","vivere":"vivre","vivo":"je vis","servus":"l'esclave","servi":"les esclaves, ou de l'esclave","servo":"à l'esclave","servos":"les esclaves (COD)","servis":"aux esclaves, ou (avec) les esclaves",
+ "serve":"ô esclave !","discipulus":"l'élève","discipuli":"les élèves, ou de l'élève","discipulis":"aux élèves, ou (avec) les élèves",
+ "villa":"la maison","villam":"la maison (COD)","villae":"de la maison, à la maison, ou les maisons","villarum":"des maisons","hortus":"le jardin","horto":"dans le jardin, au jardin","hortum":"le jardin (COD)","hortis":"(dans) les jardins",
+ "equus":"le cheval","equis":"aux chevaux, ou (avec) les chevaux","amicus":"l'ami","amici":"les amis, ou de l'ami","deus":"le dieu","deis":"aux dieux, ou (avec) les dieux","dei":"les dieux, ou du dieu",
+ "magister":"le maître d'école","magistri":"les maîtres d'école, ou du maître d'école","magistrum":"le maître d'école (COD)","puella":"la jeune fille","puellam":"la jeune fille (COD)","puellae":"de la jeune fille, à la jeune fille, ou les jeunes filles",
+ "domina":"la maîtresse","dominae":"de la maîtresse, à la maîtresse, ou les maîtresses","cum":"avec","in":"dans","enim":"en effet","sed":"mais","statim":"aussitôt","semper":"toujours","et":"et",
+ "praeesse":"diriger, être à la tête de","prodesse":"être utile à","posse":"pouvoir","esse":"être",
+ "Domina puellae rosam dat.":"La maîtresse donne une rose à la jeune fille.",
+ "Domina rosam dat.":"La maîtresse donne une rose.",
+ "Domine, veni !":"Maître, viens !",
+ "in villa":"dans la maison","in horto":"dans le jardin","in hortis":"dans les jardins","in agro":"dans le champ",
+ "cum dominis":"avec les maîtres","cum servis":"avec les esclaves","cum pueris":"avec les enfants","cum equis":"avec les chevaux","cum magistro":"avec le maître",
+ "pueri sunt":"les enfants sont","Amici adsunt.":"Les amis sont présents.",
+ "Possunt vivere.":"Ils peuvent vivre.",
+ "Dominus servis praeest.":"Le maître dirige les esclaves.",
+ "magister discipulis praeest":"le maître d'école dirige les élèves",
+ "servi dominis prosunt":"les esclaves sont utiles aux maîtres",
+ "Pueri in villa sunt.":"Les enfants sont dans la maison.",
+ "Servi in horto sunt.":"Les esclaves sont dans le jardin.",
+ "Enim pueri cum dominis et deis sunt.":"En effet, les enfants sont avec les maîtres et les dieux.",
+ "Servi cum dominis in villa sunt.":"Les esclaves sont dans la maison avec les maîtres.",
+ "Amici adsunt, sed dominus abest.":"Les amis sont présents, mais le maître est absent.",
+ "Discipuli adsunt, sed magister abest.":"Les élèves sont présents, mais le maître est absent.",
+ "Servus in villa cum equis adest.":"L'esclave est présent dans la maison avec les chevaux.",
+ "Dominus in horto cum servis adest.":"Le maître est présent dans le jardin avec les esclaves.",
+ "Statim magister discipulis praeest.":"Aussitôt, le maître d'école dirige les élèves.",
+ "Possum ire in horto cum pueris":"Je peux aller dans le jardin avec les enfants.",
+ "Servi possunt semper vivere in domini villa.":"Les esclaves peuvent toujours vivre dans la maison du maître.",
+ "possunt vivere":"ils peuvent vivre"
+};
+function gloss(s){if(!s)return "";const k=String(s).replace(/[.,;]+$/,"");return GLOSE[s]||GLOSE[k]||GLOSE[k.charAt(0).toUpperCase()+k.slice(1)]||GLOSE[k.charAt(0).toLowerCase()+k.slice(1)]||"";}
+function isTradQ(s){if(!s)return false;if(s.tr||s.later)return true;const t=String(s.p||"").replace(/<[^>]+>/g," ").replace(/③ Raisonner :|Jumelle[^·]*·/g," ").replace(/\s+/g," ").trim();return /^(étape 4 : )?traduis\b|^que veut dire\b/i.test(t);}
+
 /* texte pour « Papa écoute » (voix.js lit FICHES[f].title et .txt) */
 const FICHES={};
 for(const k in TABLES){const T=TABLES[k];let txt;
@@ -299,7 +374,7 @@ const CREEPERS=[
    {k:"sens",p:"Jumelle 1 · Le génitif, c'est quelle fonction ?",g:[["complement du nom","cdn"]],crit:[0],hint:"rosae dans « la couleur de la rose ».",rule:RULE.casfonc,twin:1},
    {k:"sens",p:"Jumelle 2 · Le vocatif, c'est quelle fonction ?",g:[["apostrophe"]],crit:[0],hint:"Quand on appelle quelqu'un : « Domine ! »",rule:RULE.casfonc,twin:1},
    {k:"sens",p:"Jumelle 3 · L'ablatif, c'est quelle fonction ?",g:[["complement circonstanciel","cc","circonstanciel"]],crit:[0],hint:"Où ? avec qui ? comment ?",rule:RULE.casfonc,twin:1}]},
- {id:"c2",ex:1,pts:0.75,name:"Le creeper de puer (singulier)",q:"Décline puer, pueri, m au singulier.",his:"puerif · puerif · puerul",exp:"puer · puer · puerum",notion:"Noms en -er",
+ {id:"c2",ex:1,pts:0.75,name:"Le creeper de puer (singulier)",q:"Décline puer, pueri, m au singulier.",his:"puerif · puerif · puerul",exp:"puer · puer · puerum",expfr:"l'enfant, l'enfant (on l'appelle), l'enfant (COD)",notion:"Noms en -er",
   ctx:"forge",tab:"puer",
   steps:[
    {k:"sens",p:"Pourquoi « puerif » est faux ? Qu'est-ce que puer a de spécial ?",g:[["er","-er","pas de us","sans us","garde le e","garde","nominatif est puer"],["genitif","pueri","radical"]],crit:[0],need:1,hint:"Regarde la carte d'identité : puer, pueri. Le nominatif finit-il en -us comme dominus ?",rule:RULE.er},
@@ -309,7 +384,7 @@ const CREEPERS=[
    {k:"form",p:"Jumelle 2 · <b>magister, magistri, m</b> · vocatif singulier ?",a:["magister"],hint:"Comme puer et ager : au vocatif singulier, on garde magister.",twin:1},
    {k:"form",p:"Jumelle 2 · <b>magister, magistri</b> · accusatif singulier ?",a:["magistrum"],hint:"Radical sur le génitif : magistri → magistr-.",twin:1},
    {k:"form",p:"Jumelle 3 · Vocatif singulier de <b>dominus</b> ? (attention, ce n'est pas un nom en -er)",a:["domine"],hint:"dominus fait -e au vocatif. puer, ager, magister gardent leur forme.",twin:1}]},
- {id:"c3",ex:1,pts:1,name:"Le creeper de puer (pluriel)",q:"Décline puer, pueri, m au pluriel.",his:"puera · puera · puera · puerorum barré",exp:"pueri · pueri · pueros · puerorum",notion:"2e déclinaison au pluriel",
+ {id:"c3",ex:1,pts:1,name:"Le creeper de puer (pluriel)",q:"Décline puer, pueri, m au pluriel.",his:"puera · puera · puera · puerorum barré",exp:"pueri · pueri · pueros · puerorum",expfr:"les enfants, les enfants (on les appelle), les enfants (COD), des enfants",notion:"2e déclinaison au pluriel",
   ctx:"forge",tab:"puer",
   steps:[
    {k:"sens",p:"Pourquoi « puera » est faux ? (indice : à quel mot ressemble ce pluriel ?)",g:[["masculin","dominus","domini"],["neutre","templa","templum"]],crit:[],need:1,hint:"puer est masculin comme dominus. Les pluriels en -a sont ceux des neutres, comme templa.",rule:RULE.masc},
@@ -334,11 +409,11 @@ const CREEPERS=[
    {k:"form",p:"Jumelle 2 · <b>ils sont à la tête de</b>",a:["praesunt"],hint:"prae + sunt.",twin:1},
    {k:"form",p:"Jumelle 3 · <b>tu es utile</b> (prosum)",a:["prodes"],hint:"Devant une voyelle, pro devient prod : prod + es.",twin:1}]},
  /* ---------- Exercice 3 : le Chantier de la villa ---------- */
- {id:"c7",ex:3,pts:1.75,name:"Le creeper de cum",q:"Analyse et traduis : Enim pueri cum dominis et deis sunt.",his:"dominis = datif, deis = accusatif · « en effet l'enfant avec le maître et son déesse »",exp:"En effet, les enfants sont avec les maîtres et les dieux.",notion:"cum + ablatif, pluriel",
+ {id:"c7",ex:3,pts:1.75,name:"Le creeper de cum",q:"Analyse et traduis : Enim pueri cum dominis et deis sunt.",qfr:"En effet, les enfants sont avec les maîtres et les dieux.",his:"dominis = datif, deis = accusatif · « en effet l'enfant avec le maître et son déesse »",exp:"En effet, les enfants sont avec les maîtres et les dieux.",notion:"cum + ablatif, pluriel",
   ctx:"chantier",words:["Enim","pueri","cum","dominis","et","deis","sunt"],
   steps:[
    {k:"form",p:"1. Le verbe d'abord. Écris le verbe de la phrase.",a:["sunt"],w:6,role:"verbe",hint:"Le verbe est conjugué : c'est une forme de sum.",rule:RULE.methode},
-   {k:"sens",p:"Traduis ce verbe.",g:[["sont","ils sont"]],crit:[0],w:6,hint:"sunt = ils sont.",rule:"sum, es, est, sumus, estis, sunt."},
+   {k:"sens",later:1,glose:"ils sont",p:"Traduis ce verbe : <b>sunt</b>.",g:[["sont","ils sont"]],crit:[0],w:6,hint:"sunt = ils sont.",rule:"sum, es, est, sumus, estis, sunt."},
    {k:"form",p:"2. Le sujet : quel mot est au nominatif ?",a:["pueri"],w:1,role:"sujet",hint:"Qui « sont » ? Un mot en -i qui peut être nominatif pluriel.",rule:RULE.methode},
    {k:"cas",p:"<b>pueri</b> : quel cas et quel nombre ?",cas:["nom","pl"],w:1,hint:"sunt est au pluriel : le sujet aussi.",rule:RULE.nombre},
    {k:"cas",p:"<b>dominis</b> : quel cas et quel nombre ?",cas:["abl","pl"],w:3,hint:"-is = datif OU ablatif pluriel. Regarde le mot juste avant.",rule:RULE.cum},
@@ -347,17 +422,17 @@ const CREEPERS=[
    {k:"sens",p:"3. Traduis toute la phrase.",tr:1,g:[["en effet","car"],["enfants!"],["sont"],["avec"],["maitres!"],["dieux!"]],crit:[1,4,5],forbid:["l enfant","le maitre","deesse","son"],hint:"Tout est au pluriel : les enfants, les maîtres, les dieux.",rule:RULE.nombre},
    {k:"cas",p:"Jumelle · <b>Servi cum dominis in villa sunt.</b> <br><b>villa</b> : quel cas et quel nombre ?",cas:["abl","sg"],twin:1,ws:["Servi","cum","dominis","in","villa","sunt"],w:4,hint:"in + ablatif.",rule:RULE.cum},
    {k:"sens",p:"Jumelle · Traduis : <b>Servi cum dominis in villa sunt.</b>",tr:1,twin:1,ws:["Servi","cum","dominis","in","villa","sunt"],exp:"Les esclaves sont dans la maison avec les maîtres.",g:[["esclaves!"],["sont"],["avec"],["maitres!"],["dans"],["maison","villa"]],crit:[0,3],forbid:["l esclave","le maitre"],hint:"Les esclaves… avec les maîtres…",rule:RULE.nombre}]},
- {id:"c8",ex:3,pts:1.25,name:"Le creeper des amis",q:"Analyse et traduis : Amici adsunt, sed dominus abest.",his:"amici mal analysé · « l'ami est présent mais le maître est absent »",exp:"Les amis sont présents, mais le maître est absent.",notion:"Lire le pluriel",
+ {id:"c8",ex:3,pts:1.25,name:"Le creeper des amis",q:"Analyse et traduis : Amici adsunt, sed dominus abest.",qfr:"Les amis sont présents, mais le maître est absent.",his:"amici mal analysé · « l'ami est présent mais le maître est absent »",exp:"Les amis sont présents, mais le maître est absent.",notion:"Lire le pluriel",
   ctx:"chantier",words:["Amici","adsunt,","sed","dominus","abest."],
   steps:[
    {k:"form",p:"1. Il y a deux verbes. Écris le premier.",a:["adsunt"],w:1,role:"verbe",hint:"Une forme de adsum.",rule:RULE.methode},
-   {k:"sens",p:"Traduis <b>adsunt</b>.",g:[["sont presents","sont la"]],crit:[0],w:1,hint:"adsum = je suis présent. -sunt = ils.",rule:RULE.comp},
+   {k:"sens",later:1,glose:"ils sont présents",p:"Traduis <b>adsunt</b>.",g:[["sont presents","sont la"]],crit:[0],w:1,hint:"adsum = je suis présent. -sunt = ils.",rule:RULE.comp},
    {k:"cas",p:"<b>Amici</b> est le sujet de adsunt : quel cas et quel nombre ?",cas:["nom","pl"],w:0,hint:"adsunt est au pluriel. -i = nominatif pluriel.",rule:RULE.nombre},
-   {k:"sens",p:"Traduis <b>abest</b>.",g:[["est absent"]],crit:[0],w:4,hint:"absum = je suis absent. est = il.",rule:RULE.comp},
+   {k:"sens",later:1,glose:"il est absent",p:"Traduis <b>abest</b>.",g:[["est absent"]],crit:[0],w:4,hint:"absum = je suis absent. est = il.",rule:RULE.comp},
    {k:"cas",p:"<b>dominus</b> : quel cas et quel nombre ?",cas:["nom","sg"],w:3,hint:"-us : nominatif singulier, sujet de abest.",rule:RULE.casfonc},
    {k:"sens",p:"Traduis toute la phrase.",tr:1,g:[["amis!"],["sont presents","sont la"],["mais"],["maitre"],["est absent"]],crit:[0,1],forbid:["l ami","est present"],hint:"Amici et adsunt sont au pluriel.",rule:RULE.nombre},
    {k:"sens",p:"Jumelle · Traduis : <b>Discipuli adsunt, sed magister abest.</b>",tr:1,twin:1,ws:["Discipuli","adsunt,","sed","magister","abest."],exp:"Les élèves sont présents, mais le maître est absent.",g:[["eleves!"],["sont presents","sont la"],["mais"],["maitre"],["est absent"]],crit:[0,1],forbid:["l eleve"],hint:"Discipuli : nominatif pluriel.",rule:RULE.nombre}]},
- {id:"c9",ex:3,pts:1.75,name:"Le creeper de la villa",q:"Analyse et traduis : Servus in villa cum equis adest.",his:"villa = accusatif, equis = datif · « avec son cheval »",exp:"L'esclave est présent dans la maison avec les chevaux.",notion:"in / cum + ablatif",
+ {id:"c9",ex:3,pts:1.75,name:"Le creeper de la villa",q:"Analyse et traduis : Servus in villa cum equis adest.",qfr:"L'esclave est présent dans la maison avec les chevaux.",his:"villa = accusatif, equis = datif · « avec son cheval »",exp:"L'esclave est présent dans la maison avec les chevaux.",notion:"in / cum + ablatif",
   ctx:"chantier",words:["Servus","in","villa","cum","equis","adest."],
   steps:[
    {k:"form",p:"1. Écris le verbe.",a:["adest"],w:5,role:"verbe",hint:"Une forme de adsum.",rule:RULE.methode},
@@ -367,18 +442,18 @@ const CREEPERS=[
    {k:"cas",p:"<b>equis</b> : quel cas et quel nombre ?",cas:["abl","pl"],w:4,hint:"-is : datif ou ablatif pluriel. Mot devant : cum.",rule:RULE.cum},
    {k:"sens",p:"3. Traduis toute la phrase.",tr:1,g:[["esclave"],["est present","est la"],["dans"],["maison","villa"],["avec"],["chevaux!"]],crit:[0,5],forbid:["son cheval","le cheval"],hint:"equis est au pluriel : les chevaux.",rule:RULE.nombre},
    {k:"sens",p:"Jumelle · Traduis : <b>Dominus in horto cum servis adest.</b>",tr:1,twin:1,ws:["Dominus","in","horto","cum","servis","adest."],exp:"Le maître est présent dans le jardin avec les esclaves.",g:[["maitre"],["est present","est la"],["dans"],["jardin"],["avec"],["esclaves!"]],crit:[0,3,5],forbid:["l esclave","son esclave"],hint:"servis : ablatif pluriel après cum.",rule:RULE.cum}]},
- {id:"c10",ex:3,pts:1.5,name:"Le creeper de praeesse",q:"Analyse et traduis : Statim magister discipulis praeest.",his:"magister et discipulis mal analysés · « le maître d'école est utile aux élèves »",exp:"Aussitôt, le maître dirige les élèves.",notion:"praeesse + datif",
+ {id:"c10",ex:3,pts:1.5,name:"Le creeper de praeesse",q:"Analyse et traduis : Statim magister discipulis praeest.",qfr:"Aussitôt, le maître d'école dirige les élèves.",his:"magister et discipulis mal analysés · « le maître d'école est utile aux élèves »",exp:"Aussitôt, le maître dirige les élèves.",notion:"praeesse + datif",
   ctx:"chantier",words:["Statim","magister","discipulis","praeest."],
   steps:[
    {k:"form",p:"1. Écris le verbe.",a:["praeest"],w:3,role:"verbe",hint:"prae + est.",rule:RULE.methode},
-   {k:"sens",p:"Traduis <b>praeest</b>. (Ce n'est pas « il est utile » : ça, c'est prodest.)",g:[["dirige","commande","est a la tete"]],crit:[0],w:3,hint:"praesum = je commande, je suis à la tête de.",rule:RULE.praeesse},
+   {k:"sens",later:1,glose:"il dirige, il commande",p:"Traduis <b>praeest</b>. (Ce n'est pas « il est utile » : ça, c'est prodest.)",g:[["dirige","commande","est a la tete"]],crit:[0],w:3,hint:"praesum = je commande, je suis à la tête de.",rule:RULE.praeesse},
    {k:"cas",p:"<b>magister</b> : quel cas et quel nombre ?",cas:["nom","sg"],w:1,hint:"Comme puer : magister est le nominatif singulier. C'est le sujet.",rule:RULE.er},
    {k:"cas",p:"<b>discipulis</b> : quel cas et quel nombre ?",cas:["dat","pl"],w:2,hint:"Pas de cum ni de in ici. C'est le verbe praeesse qui impose son cas.",rule:RULE.praeesse},
    {k:"sens",p:"Pourquoi le datif pour <b>discipulis</b> ?",g:[["praeest","praeesse","praesum","verbe"]],crit:[0],w:2,hint:"Qui impose le datif ?",rule:RULE.praeesse},
    {k:"sens",p:"3. Traduis toute la phrase.",tr:1,g:[["aussitot","immediatement","tout de suite"],["maitre"],["dirige","commande","est a la tete"],["eleves!"]],crit:[0,1,2,3],forbid:["utile"],hint:"Statim = aussitôt. discipulis est au pluriel.",rule:RULE.praeesse},
    {k:"sens",p:"Jumelle · Traduis : <b>Dominus servis praeest.</b>",tr:1,twin:1,ws:["Dominus","servis","praeest."],exp:"Le maître dirige les esclaves.",g:[["maitre"],["dirige","commande","est a la tete"],["esclaves!"]],crit:[0,1,2],forbid:["utile"],hint:"servis : datif pluriel avec praeesse.",rule:RULE.praeesse}]},
  /* ---------- Exercice 4 : la Tour du thème ---------- */
- {id:"c11",ex:4,pts:0.5,name:"Le creeper du jardin",q:"Traduis : Je peux aller dans le jardin avec les enfants.",his:"Possum ire in hortum cum pueris",exp:"Possum ire in horto cum pueris (règle du cours : in + ablatif)",notion:"in + ablatif",
+ {id:"c11",ex:4,pts:0.5,name:"Le creeper du jardin",q:"Traduis : Je peux aller dans le jardin avec les enfants.",his:"Possum ire in hortum cum pueris",exp:"Possum ire in horto cum pueris (règle du cours : in + ablatif)",expfr:"Je peux aller dans le jardin avec les enfants.",notion:"in + ablatif",
   ctx:"theme",fr:["Je peux","aller","dans le jardin","avec les enfants"],la:["Possum","ire","in horto","cum pueris"],bad:{2:"in hortum"},
   steps:[
    {k:"sens",p:"Dans ta copie : « in hortum ». Ton cours dit : in + quel cas ?",g:[["ablatif","abl"]],crit:[0],hint:"Regarde le mémo du sujet : in + abl = dans.",rule:RULE.cum},
@@ -386,7 +461,7 @@ const CREEPERS=[
    {k:"form",p:"Jumelle 1 · <b>dans la maison</b>",a:["in villa","villa"],hint:"villa, ae, f : ablatif singulier = villa.",twin:1},
    {k:"form",p:"Jumelle 2 · <b>dans le champ</b>",a:["in agro","agro"],hint:"ager, agri : ablatif singulier = agro.",twin:1},
    {k:"form",p:"Jumelle 3 · <b>dans les jardins</b>",a:["in hortis","hortis"],hint:"Ablatif pluriel : -is.",twin:1}]},
- {id:"c12",ex:4,pts:1.5,name:"Le creeper du thème",q:"Traduis : Les esclaves peuvent toujours vivre dans la maison du maître.",his:"Servo possunt sempe vivo in dominus villa",exp:"Servi possunt semper vivere in domini villa.",notion:"Fonction → cas → terminaison",
+ {id:"c12",ex:4,pts:1.5,name:"Le creeper du thème",q:"Traduis : Les esclaves peuvent toujours vivre dans la maison du maître.",his:"Servo possunt sempe vivo in dominus villa",exp:"Servi possunt semper vivere in domini villa.",expfr:"Les esclaves peuvent toujours vivre dans la maison du maître.",notion:"Fonction → cas → terminaison",
   ctx:"theme",fr:["Les esclaves","peuvent","toujours","vivre","dans la maison","du maître"],la:["Servi","possunt","semper","vivere","in villa","domini"],bad:{0:"Servo",2:"sempe",3:"vivo",5:"dominus"},
   steps:[
    {k:"sens",p:"Méthode du thème : dis comment on trouve la bonne terminaison.",g:[["fonction"],["cas"],["terminaison"]],crit:[1],need:2,hint:"D'abord la fonction en français, puis le cas, puis la terminaison.",rule:RULE.theme},
@@ -432,27 +507,27 @@ const LESSONS=[
  {id:"L1",n:1,title:"Les 6 cas et leurs fonctions",short:"les 6 cas",
   expl:`En latin, la <b>fin du mot</b> (la terminaison) change selon sa <b>fonction</b> dans la phrase. Chaque fonction a son <b>cas</b>.
    <table class="ltab"><tr><th>Cas</th><th>Fonction</th><th>Exemple</th></tr>
-   <tr><td>nominatif</td><td>sujet ou attribut du sujet</td><td><b>Domina</b> rosam dat.</td></tr>
-   <tr><td>vocatif</td><td>apostrophe (on appelle)</td><td><b>Domine</b>, veni !</td></tr>
-   <tr><td>accusatif</td><td>COD</td><td>Domina <b>rosam</b> dat.</td></tr>
-   <tr><td>génitif</td><td>complément du nom</td><td>la rose <b>de la maîtresse</b></td></tr>
-   <tr><td>datif</td><td>COI (à qui ?)</td><td>Domina <b>puellae</b> rosam dat.</td></tr>
-   <tr><td>ablatif</td><td>complément circonstanciel</td><td><b>in villa</b> (dans la maison)</td></tr></table>
+   <tr><td>nominatif</td><td>sujet ou attribut du sujet</td><td>${pair("<b>Domina</b> rosam dat.","La maîtresse donne une rose.")}</td></tr>
+   <tr><td>vocatif</td><td>apostrophe (on appelle)</td><td>${pair("<b>Domine</b>, veni !","Maître, viens !")}</td></tr>
+   <tr><td>accusatif</td><td>COD</td><td>${pair("Domina <b>rosam</b> dat.","La maîtresse donne une rose.")}</td></tr>
+   <tr><td>génitif</td><td>complément du nom</td><td>${pair("<b>rosa dominae</b>","la rose de la maîtresse")}</td></tr>
+   <tr><td>datif</td><td>COI (à qui ?)</td><td>${pair("Domina <b>puellae</b> rosam dat.","La maîtresse donne une rose à la jeune fille.")}</td></tr>
+   <tr><td>ablatif</td><td>complément circonstanciel</td><td>${pair("<b>in villa</b>","dans la maison")}</td></tr></table>
    <p class="lkey">⚠ Le nominatif n'est PAS le COD. Le COD, c'est l'accusatif.</p>`,
   memo:"nominatif : sujet ou attribut du sujet • vocatif : apostrophe • accusatif : COD • génitif : complément du nom • datif : COI • ablatif : complément circonstanciel",
   latin:[],
   test:[
-   {k:"sens",p:"<b>Domina puellae rosam dat.</b> Quel est le cas de <b>rosam</b>, et pourquoi ?",g:[["accusatif","acc"],["cod","complement d objet direct","ce qu elle donne"]],crit:[0],need:2,hint:"rosam = ce que la maîtresse donne : c'est le COD."},
+   {k:"sens",p:`${pair("<b>Domina puellae rosam dat.</b>","La maîtresse donne une rose à la jeune fille.")} Quel est le cas de ${pair("<b>rosam</b>","la rose (COD)")}, et pourquoi ?`,g:[["accusatif","acc"],["cod","complement d objet direct","ce qu elle donne"]],crit:[0],need:2,hint:"rosam = ce que la maîtresse donne : c'est le COD."},
    {k:"sens",p:"Le sujet d'un verbe se met à quel cas ?",g:[["nominatif"]],crit:[0],hint:"Domina (le sujet) est au…"},
    {k:"sens",p:"Dans « la rose <b>de la maîtresse</b> », « de la maîtresse » est un complément du nom. Quel cas en latin ?",g:[["genitif"]],crit:[0],hint:"Complément du nom = …"},
    {k:"sens",p:"Pour appeler quelqu'un (« Maître ! »), quel cas ?",g:[["vocatif"]],crit:[0],hint:"apostrophe = …"}]},
  {id:"L2",n:2,title:"Une terminaison = plusieurs cas possibles",short:"une terminaison, plusieurs cas",
   expl:`Une même terminaison peut correspondre à <b>plusieurs cas</b>. Il faut d'abord <b>toutes les lister</b>, puis la phrase choisit.
    <table class="ltab"><tr><th>Fin</th><th>Possibilités</th><th>Exemple</th></tr>
-   <tr><td>-ae</td><td>génitif sg, datif sg, nominatif pl, vocatif pl</td><td>rosae, puellae</td></tr>
-   <tr><td>-is</td><td>datif pl, ablatif pl</td><td>rosis, dominis, equis</td></tr>
-   <tr><td>-i</td><td>génitif sg, nominatif pl, vocatif pl</td><td>domini, pueri, amici</td></tr></table>
-   <p class="lkey">Le <b>verbe</b> aide pour le nombre : <b>pueri sunt</b> (sunt = ils sont) → pueri est au pluriel → « les enfants sont ».</p>`,
+   <tr><td>-ae</td><td>génitif sg, datif sg, nominatif pl, vocatif pl</td><td>${pair("rosae","de la rose, à la rose, ou les roses")}, ${pair("puellae","de la jeune fille, à la jeune fille, ou les jeunes filles")}</td></tr>
+   <tr><td>-is</td><td>datif pl, ablatif pl</td><td>${pair("rosis","aux roses, ou (avec, dans) les roses")}, ${pair("dominis","aux maîtres, ou (avec) les maîtres")}, ${pair("equis","aux chevaux, ou (avec) les chevaux")}</td></tr>
+   <tr><td>-i</td><td>génitif sg, nominatif pl, vocatif pl</td><td>${pair("domini","du maître, ou les maîtres")}, ${pair("pueri","de l'enfant, ou les enfants")}, ${pair("amici","de l'ami, ou les amis")}</td></tr></table>
+   <p class="lkey">Le <b>verbe</b> aide pour le nombre : ${pair("<b>pueri sunt</b>","les enfants sont")} (${pair("sunt","ils sont")}) → pueri est au pluriel → « les enfants sont ».</p>`,
   memo:"une terminaison peut avoir plusieurs cas • -ae : génitif ou datif singulier, nominatif ou vocatif pluriel • -is : datif ou ablatif pluriel • -i : génitif singulier, nominatif ou vocatif pluriel • la phrase choisit",
   latin:[],
   test:[
@@ -460,77 +535,80 @@ const LESSONS=[
    {k:"cas",p:"Donne <b>toutes</b> les possibilités pour <b>puellae</b>.",cas:[["gen","sg"],["dat","sg"],["nom","pl"],["voc","pl"]],hint:"-ae : quatre possibilités."},
    {k:"sens",p:"<b>Amici adsunt.</b> Pourquoi faut-il traduire « les amis sont présents » et pas « l'ami est présent » ?",g:[["adsunt","sunt","verbe","pluriel"]],crit:[0],hint:"Regarde la fin du verbe : -sunt = ils."}]},
  {id:"L3",n:3,title:"La 1re déclinaison : rosa",short:"rosa",
-  expl:`<b>rosa, ae, f</b> : la rose. La carte d'identité donne le nominatif (rosa), le génitif (rosae) et le genre (f).
+  expl:`${pair("<b>rosa, ae, f</b>","la rose")}. La carte d'identité donne le nominatif (${pair("rosa","la rose")}), le génitif (${pair("rosae","de la rose")}) et le genre (f).
    <table class="ltab"><tr><th></th><th>singulier</th><th>pluriel</th></tr>
-   <tr><td>nominatif</td><td>ros<b>a</b></td><td>ros<b>ae</b></td></tr><tr><td>vocatif</td><td>ros<b>a</b></td><td>ros<b>ae</b></td></tr>
-   <tr><td>accusatif</td><td>ros<b>am</b></td><td>ros<b>as</b></td></tr><tr><td>génitif</td><td>ros<b>ae</b></td><td>ros<b>arum</b></td></tr>
-   <tr><td>datif</td><td>ros<b>ae</b></td><td>ros<b>is</b></td></tr><tr><td>ablatif</td><td>ros<b>a</b></td><td>ros<b>is</b></td></tr></table>
+   <tr><td>nominatif</td><td>ros<b>a</b>${trfr("la rose")}</td><td>ros<b>ae</b>${trfr("les roses")}</td></tr>
+   <tr><td>vocatif</td><td>ros<b>a</b>${trfr("la rose (on l'appelle)")}</td><td>ros<b>ae</b>${trfr("les roses (on les appelle)")}</td></tr>
+   <tr><td>accusatif</td><td>ros<b>am</b>${trfr("la rose (COD)")}</td><td>ros<b>as</b>${trfr("les roses (COD)")}</td></tr>
+   <tr><td>génitif</td><td>ros<b>ae</b>${trfr("de la rose")}</td><td>ros<b>arum</b>${trfr("des roses")}</td></tr>
+   <tr><td>datif</td><td>ros<b>ae</b>${trfr("à la rose")}</td><td>ros<b>is</b>${trfr("aux roses")}</td></tr>
+   <tr><td>ablatif</td><td>ros<b>a</b>${trfr("(avec, dans) la rose")}</td><td>ros<b>is</b>${trfr("(avec, dans) les roses")}</td></tr></table>
    <p class="lkey">Même modèle pour villa, puella, domina, statua…</p>`,
   memo:"rosa rosa rosam rosae rosae rosa • rosae rosae rosas rosarum rosis rosis",
   latin:["rosa","rosam","rosae","rosas","rosarum","rosis"],fiche:"rosa",
   test:[
-   {k:"form",p:"<b>puella, ae, f</b> (la jeune fille) · accusatif singulier ?",a:["puellam"],hint:"Comme rosam."},
+   {k:"form",p:"<b>puella, ae, f</b> (la jeune fille) · accusatif singulier ?",a:["puellam"],hint:"Comme rosam : la jeune fille (COD)."},
    {k:"form",p:"<b>villa, ae, f</b> · génitif pluriel ?",a:["villarum"],hint:"Comme rosarum."},
-   {k:"cas",p:"<b>villam</b> : quel cas et quel nombre ?",cas:["acc","sg"],hint:"-am = …"},
+   {k:"cas",p:`${pair("<b>villam</b>","la maison (COD)")} : quel cas et quel nombre ?`,cas:["acc","sg"],hint:"-am = …"},
    {k:"form",p:"« dans la maison » : <b>in</b> + villa à l'ablatif singulier ?",a:["in villa","villa"],hint:"Ablatif singulier de rosa : rosa."}]},
  {id:"L4",n:4,title:"La 2e déclinaison : dominus, puer, ager, templum",short:"dominus, puer, ager, templum",
-  expl:`<table class="ltab"><tr><th></th><th>dominus (m)</th><th>puer (m)</th><th>ager (m)</th><th>templum (n)</th></tr>
-   <tr><td>nom. sg</td><td>domin<b>us</b></td><td><b>puer</b></td><td><b>ager</b></td><td>templ<b>um</b></td></tr>
-   <tr><td>voc. sg</td><td>domin<b>e</b></td><td><b>puer</b></td><td><b>ager</b></td><td>templ<b>um</b></td></tr>
-   <tr><td>acc. sg</td><td>domin<b>um</b></td><td>puer<b>um</b></td><td>agr<b>um</b></td><td>templ<b>um</b></td></tr>
-   <tr><td>gén. sg</td><td>domin<b>i</b></td><td>puer<b>i</b></td><td>agr<b>i</b></td><td>templ<b>i</b></td></tr>
-   <tr><td>dat./abl. sg</td><td>domin<b>o</b></td><td>puer<b>o</b></td><td>agr<b>o</b></td><td>templ<b>o</b></td></tr>
-   <tr><td>nom./voc. pl</td><td>domin<b>i</b></td><td>puer<b>i</b></td><td>agr<b>i</b></td><td>templ<b>a</b></td></tr>
-   <tr><td>acc. pl</td><td>domin<b>os</b></td><td>puer<b>os</b></td><td>agr<b>os</b></td><td>templ<b>a</b></td></tr>
-   <tr><td>gén. pl</td><td>domin<b>orum</b></td><td>puer<b>orum</b></td><td>agr<b>orum</b></td><td>templ<b>orum</b></td></tr>
-   <tr><td>dat./abl. pl</td><td>domin<b>is</b></td><td>puer<b>is</b></td><td>agr<b>is</b></td><td>templ<b>is</b></td></tr></table>
+  expl:`<table class="ltab"><tr><th></th><th>dominus (m)${trfr("le maître")}</th><th>puer (m)${trfr("l'enfant")}</th><th>ager (m)${trfr("le champ")}</th><th>templum (n)${trfr("le temple")}</th></tr>
+   <tr><td>nom. sg</td><td>domin<b>us</b>${trfr("le maître")}</td><td><b>puer</b>${trfr("l'enfant")}</td><td><b>ager</b>${trfr("le champ")}</td><td>templ<b>um</b>${trfr("le temple")}</td></tr>
+   <tr><td>voc. sg</td><td>domin<b>e</b>${trfr("ô maître !")}</td><td><b>puer</b>${trfr("l'enfant (on l'appelle)")}</td><td><b>ager</b>${trfr("le champ (on l'appelle)")}</td><td>templ<b>um</b>${trfr("le temple")}</td></tr>
+   <tr><td>acc. sg</td><td>domin<b>um</b>${trfr("le maître (COD)")}</td><td>puer<b>um</b>${trfr("l'enfant (COD)")}</td><td>agr<b>um</b>${trfr("le champ (COD)")}</td><td>templ<b>um</b>${trfr("le temple (COD)")}</td></tr>
+   <tr><td>gén. sg</td><td>domin<b>i</b>${trfr("du maître")}</td><td>puer<b>i</b>${trfr("de l'enfant")}</td><td>agr<b>i</b>${trfr("du champ")}</td><td>templ<b>i</b>${trfr("du temple")}</td></tr>
+   <tr><td>dat./abl. sg</td><td>domin<b>o</b>${trfr("au maître / (avec, dans) le maître")}</td><td>puer<b>o</b>${trfr("à l'enfant / (avec, dans) l'enfant")}</td><td>agr<b>o</b>${trfr("au champ / (avec, dans) le champ")}</td><td>templ<b>o</b>${trfr("au temple / (avec, dans) le temple")}</td></tr>
+   <tr><td>nom./voc. pl</td><td>domin<b>i</b>${trfr("les maîtres")}</td><td>puer<b>i</b>${trfr("les enfants")}</td><td>agr<b>i</b>${trfr("les champs")}</td><td>templ<b>a</b>${trfr("les temples")}</td></tr>
+   <tr><td>acc. pl</td><td>domin<b>os</b>${trfr("les maîtres (COD)")}</td><td>puer<b>os</b>${trfr("les enfants (COD)")}</td><td>agr<b>os</b>${trfr("les champs (COD)")}</td><td>templ<b>a</b>${trfr("les temples (COD)")}</td></tr>
+   <tr><td>gén. pl</td><td>domin<b>orum</b>${trfr("des maîtres")}</td><td>puer<b>orum</b>${trfr("des enfants")}</td><td>agr<b>orum</b>${trfr("des champs")}</td><td>templ<b>orum</b>${trfr("des temples")}</td></tr>
+   <tr><td>dat./abl. pl</td><td>domin<b>is</b>${trfr("aux maîtres / (avec, dans) les maîtres")}</td><td>puer<b>is</b>${trfr("aux enfants / (avec, dans) les enfants")}</td><td>agr<b>is</b>${trfr("aux champs / (avec, dans) les champs")}</td><td>templ<b>is</b>${trfr("aux temples / (avec, dans) les temples")}</td></tr></table>
    <p class="lkey">Noms en <b>-er</b> (puer, ager, magister) : nominatif et vocatif singulier = le mot tel quel, sans -us ni -e. Le <b>génitif</b> montre le radical : pueri (le e reste), agri (le e tombe).<br>Le pluriel en <b>-a</b> est réservé aux <b>neutres</b> (templa). Les masculins font -i, -os.</p>`,
   memo:"masculin : -us -e -um -i -o -o • -i -i -os -orum -is -is • neutre : -um -um -um -i -o -o • -a -a -a -orum -is -is • noms en -er : puer et ager au nominatif et au vocatif singulier, radical du génitif : pueri, agri",
   latin:["us","e","um","i","o","os","orum","is","a","puer","ager","pueri","agri"],fiche:"puer",
   test:[
-   {k:"form",p:"<b>puer, pueri</b> · vocatif singulier ?",a:["puer"],hint:"Nom en -er : pas de -e au vocatif."},
-   {k:"form",p:"<b>ager, agri</b> · accusatif singulier ?",a:["agrum"],hint:"Radical du génitif : agr-."},
-   {k:"form",p:"<b>servus, i, m</b> · vocatif singulier ?",a:["serve"],hint:"Comme domine."},
-   {k:"form",p:"<b>templum, i, n</b> · nominatif pluriel ?",a:["templa"],hint:"Neutre : -a."},
-   {k:"form",p:"<b>puer</b> · accusatif pluriel ?",a:["pueros"],hint:"Masculin : -os (pas -a)."},
+   {k:"form",p:"<b>puer, pueri</b> (l'enfant) · vocatif singulier ?",a:["puer"],hint:"Nom en -er : pas de -e au vocatif."},
+   {k:"form",p:"<b>ager, agri</b> (le champ) · accusatif singulier ?",a:["agrum"],hint:"Radical du génitif : agr-."},
+   {k:"form",p:"<b>servus, i, m</b> (l'esclave) · vocatif singulier ?",a:["serve"],hint:"Comme domine : ô esclave !"},
+   {k:"form",p:"<b>templum, i, n</b> (le temple) · nominatif pluriel ?",a:["templa"],hint:"Neutre : -a. les temples."},
+   {k:"form",p:`${pair("<b>puer</b>","l'enfant")} · accusatif pluriel ?`,a:["pueros"],hint:"Masculin : -os (pas -a). les enfants (COD)."},
    {k:"sens",p:"Pourquoi le nominatif de puer n'est pas « puerus » ?",g:[["er","-er","nom en er"]],crit:[0],hint:"puer finit par… ?"}]},
  {id:"L5",n:5,title:"Le verbe être (sum) et ses composés",short:"sum et ses composés",
-  expl:`<b>sum, es, esse, fui</b> : être → sum, es, est, sumus, estis, sunt.<br>Un composé = <b>préfixe + forme de sum</b> :
-   <table class="ltab"><tr><td>absum</td><td>je suis absent</td><td>ab + sunt = absunt</td></tr>
-   <tr><td>adsum</td><td>je suis présent</td><td>ad + est = adest</td></tr>
-   <tr><td>desum</td><td>je manque</td><td>de + es = dees</td></tr>
-   <tr><td>praesum + datif</td><td>je commande, je suis à la tête de</td><td>prae + est = praeest</td></tr>
-   <tr><td>prosum</td><td>je suis utile</td><td>prod devant voyelle : prodest</td></tr>
-   <tr><td>possum + infinitif</td><td>je peux</td><td>possunt vivere = ils peuvent vivre</td></tr></table>
-   <p class="lkey">⚠ praeest = il dirige. prodest = il est utile. Ne pas confondre.</p>`,
+  expl:`${pair("<b>sum, es, esse, fui</b>","être")} : ${pair("sum","je suis")}, ${pair("es","tu es")}, ${pair("est","il est")}, ${pair("sumus","nous sommes")}, ${pair("estis","vous êtes")}, ${pair("sunt","ils sont")}.<br>Un composé = <b>préfixe + forme de sum</b> :
+   <table class="ltab"><tr><td>${pair("absum","je suis absent")}</td><td>je suis absent</td><td>ab + sunt = ${pair("absunt","ils sont absents")}</td></tr>
+   <tr><td>${pair("adsum","je suis présent")}</td><td>je suis présent</td><td>ad + est = ${pair("adest","il est présent")}</td></tr>
+   <tr><td>${pair("desum","je manque")}</td><td>je manque</td><td>de + es = ${pair("dees","tu manques")}</td></tr>
+   <tr><td>${pair("praesum","je commande")} + datif</td><td>je commande, je suis à la tête de</td><td>prae + est = ${pair("praeest","il dirige")}</td></tr>
+   <tr><td>${pair("prosum","je suis utile")}</td><td>je suis utile</td><td>prod devant voyelle : ${pair("prodest","il est utile")}</td></tr>
+   <tr><td>${pair("possum","je peux")} + infinitif</td><td>je peux</td><td>${pair("possunt vivere","ils peuvent vivre")}</td></tr></table>
+   <p class="lkey">⚠ ${pair("praeest","il dirige")}. ${pair("prodest","il est utile")}. Ne pas confondre.</p>`,
   memo:"sum es est sumus estis sunt • absum : je suis absent • adsum : je suis présent • desum : je manque • praesum + datif : je commande • prosum : je suis utile • possum + infinitif : je peux",
   latin:["sum","es","est","sumus","estis","sunt","absum","adsum","desum","praesum","prosum","possum"],fiche:"composes",
   test:[
    {k:"form",p:"Traduis : <b>vous êtes présents</b>",a:["adestis"],hint:"ad + estis."},
    {k:"form",p:"Traduis : <b>il est utile</b>",a:["prodest"],hint:"pro devient prod devant une voyelle."},
    {k:"form",p:"Traduis : <b>nous sommes absents</b>",a:["absumus"],hint:"ab + sumus."},
-   {k:"sens",p:"<b>Possunt vivere.</b> À quel mode est vivere, et pourquoi ?",g:[["infinitif"],["possum","possunt","pouvoir","peuvent"]],crit:[0],need:1,hint:"Après possum, le 2e verbe est à l'…"},
-   {k:"sens",p:"Que veut dire <b>praeest</b> ?",g:[["dirige","commande","est a la tete"]],crit:[0],forbid:["utile"],hint:"prae + est : être à la tête de."}]},
+   {k:"sens",p:`${pair("<b>Possunt vivere.</b>","Ils peuvent vivre.")} À quel mode est ${pair("<b>vivere</b>","vivre")}, et pourquoi ?`,g:[["infinitif"],["possum","possunt","pouvoir","peuvent"]],crit:[0],need:1,hint:"Après possum, le 2e verbe est à l'…"},
+   {k:"sens",later:1,glose:"il dirige, il commande",p:"Que veut dire <b>praeest</b> ?",g:[["dirige","commande","est a la tete"]],crit:[0],forbid:["utile"],hint:"prae + est : être à la tête de."}]},
  {id:"L6",n:6,title:"Les mots qui imposent un cas",short:"cum, in, praeesse",
   expl:`Certains mots <b>choisissent le cas</b> du mot qui les suit ou qui les complète :
-   <table class="ltab"><tr><td><b>cum</b> + ablatif</td><td>avec</td><td>cum dominis = avec les maîtres</td></tr>
-   <tr><td><b>in</b> + ablatif</td><td>dans (lieu où l'on est)</td><td>in villa, in horto</td></tr>
-   <tr><td><b>praeesse</b> + datif</td><td>diriger, être à la tête de</td><td>magister discipulis praeest</td></tr>
-   <tr><td><b>prodesse</b> + datif</td><td>être utile à</td><td>servi dominis prosunt</td></tr></table>
+   <table class="ltab"><tr><td><b>cum</b> + ablatif</td><td>avec</td><td>${pair("cum dominis","avec les maîtres")}</td></tr>
+   <tr><td><b>in</b> + ablatif</td><td>dans (lieu où l'on est)</td><td>${pair("in villa","dans la maison")}, ${pair("in horto","dans le jardin")}</td></tr>
+   <tr><td><b>praeesse</b> + datif</td><td>diriger, être à la tête de</td><td>${pair("magister discipulis praeest","le maître d'école dirige les élèves")}</td></tr>
+   <tr><td><b>prodesse</b> + datif</td><td>être utile à</td><td>${pair("servi dominis prosunt","les esclaves sont utiles aux maîtres")}</td></tr></table>
    <p class="lkey">-is peut être datif OU ablatif : regarde le mot qui commande. Après cum ou in → ablatif. Avec praeesse → datif.</p>`,
   memo:"cum + ablatif : avec • in + ablatif : dans • praeesse + datif : diriger • prodesse + datif : être utile à • c'est ce mot qui choisit entre datif et ablatif",
   latin:["cum","in","praeesse","prodesse"],
   test:[
-   {k:"cas",p:"<b>cum servis</b> : servis est à quel cas et quel nombre ?",cas:["abl","pl"],hint:"cum + …"},
-   {k:"cas",p:"<b>in horto</b> : horto ?",cas:["abl","sg"],hint:"in + …"},
-   {k:"cas",p:"<b>Dominus servis praeest.</b> servis ?",cas:["dat","pl"],hint:"praeesse + …"},
-   {k:"sens",p:"Pourquoi <b>equis</b> est à l'ablatif dans « cum equis » ?",g:[["cum","avec"]],crit:[0],hint:"Quel mot est devant ?"}]},
+   {k:"cas",p:`${pair("<b>cum servis</b>","avec les esclaves")} : servis est à quel cas et quel nombre ?`,cas:["abl","pl"],hint:"cum + …"},
+   {k:"cas",p:`${pair("<b>in horto</b>","dans le jardin")} : horto ?`,cas:["abl","sg"],hint:"in + …"},
+   {k:"cas",p:`${pair("<b>Dominus servis praeest.</b>","Le maître dirige les esclaves.")} servis ?`,cas:["dat","pl"],hint:"praeesse + …"},
+   {k:"sens",p:`Pourquoi ${pair("<b>equis</b>","les chevaux")} est à l'ablatif dans « ${pair("cum equis","avec les chevaux")} » ?`,g:[["cum","avec"]],crit:[0],hint:"Quel mot est devant ?"}]},
  {id:"L7",n:7,title:"La méthode : analyser et écrire en latin",short:"la méthode",
   expl:`<b>Pour traduire (version)</b> : 1. je trouve le <b>verbe</b> et je regarde s'il est au pluriel. 2. je trouve le <b>sujet</b> au nominatif.
    3. pour chaque autre mot : <b>cas, nombre</b>, et qui impose ce cas. 4. je traduis en gardant le <b>pluriel</b>.<br>
-   Exemple : <b>Pueri in villa sunt.</b> verbe sunt (ils sont) → sujet pueri (nominatif pluriel) → villa ablatif après in → « Les enfants sont dans la maison. »<br>
+   Exemple : ${pair("<b>Pueri in villa sunt.</b>","Les enfants sont dans la maison.")} verbe ${pair("sunt","ils sont")} → sujet ${pair("pueri","les enfants")} (nominatif pluriel) → ${pair("villa","la maison")} ablatif après in.<br>
    <b>Pour écrire en latin (thème)</b> : 1. la <b>fonction</b> en français. 2. le <b>cas</b> qui va avec. 3. la bonne <b>terminaison</b>.<br>
-   Exemple : « du maître » → complément du nom → génitif → domini.`,
+   Exemple : « du maître » → complément du nom → génitif → ${pair("domini","du maître")}.`,
   memo:"version : 1 le verbe 2 le sujet au nominatif 3 les compléments : cas et nombre 4 je traduis en gardant le pluriel • thème : 1 la fonction 2 le cas 3 la terminaison",
   latin:[],
   test:[
@@ -588,7 +666,7 @@ function lessonCtx(){const R=RUN,L=R.L,s=stepNow(),E=$("eCtx");if(!s){E.innerHTM
  if(s.k==="read")E.innerHTML=`<div class="lexpl">${L.expl}</div>`;
  else if(s.k==="memo")E.innerHTML=R.fb||memoView(L,s.pass);
  else E.innerHTML=s.ctx||"";}
-function lessonRender(s){const R=RUN;R.fb="";lessonScene();lessonCtx();$("ePrompt").innerHTML=s.p;
+function lessonRender(s){const R=RUN;R.fb="";lessonScene();lessonCtx();$("ePrompt").classList.remove("revealed");$("ePrompt").innerHTML=decoratePrompt(s);if(window.VOIX)VOIX.setQuestionLang("ch");
  const f=$("ch-in");f.value="";
  if(s.k==="read"){$("chWrap").classList.add("hide");$("eGo").classList.add("hide");$("eHint").classList.add("hide");$("eNext").classList.remove("hide");$("eNext").textContent="J'ai compris ➜";}
  else{$("chWrap").classList.remove("hide");f.rows=s.k==="memo"?4:(s.k==="form"||s.k==="cas"?1:2);f.placeholder=s.k==="memo"?"retape la leçon ici…":s.k==="cas"?"ex : ablatif pluriel":s.k==="form"?"forme latine":"ta réponse, avec tes mots";
@@ -604,11 +682,11 @@ function lessonCheck(s,v){const R=RUN,L=R.L;
   if(s.rev){const ls=LS(L.id);ls.box=0;ls.next=addDays(today(),1);save();}
   return;}
  const r=evalStep(s,v);
- if(r.ok){SND[s.k==="form"?"anvil":"ok"]();say((s.k==="form"?"✔ Forgé !":"✔ Bien raisonné !")+(s.tr&&s.exp?`<br>« ${esc(s.exp)} »`:""),"ok");$("eGo").disabled=true;R.i++;setTimeout(()=>{if(RUN===R)renderStep();},s.tr?1400:850);return;}
+ if(r.ok){SND[s.k==="form"?"anvil":"ok"]();if(s.tr||s.later||isTradQ(s))revealTrad();say((s.k==="form"?"✔ Forgé !":"✔ Bien raisonné !")+(s.tr&&s.exp?`<br>« ${esc(s.exp)} »`:s.later&&s.glose?trfr(s.glose):s.k==="form"&&gloss(s.a[0])?trfr(gloss(s.a[0])):""),"ok");$("eGo").disabled=true;R.i++;setTimeout(()=>{if(RUN===R)renderStep();},s.tr?1400:850);return;}
  R.tries++;if(R.tries===1){R.errs++;if(R.requeued<6){R.steps.push(Object.assign({},s,{again:1}));R.requeued++;}}SND.ko();
  say("✖ "+koMsg(s,r)+(R.tries===1?" Réessaie ou touche 💡. Cette question reviendra à la fin.":""),"ko");
  if(R.tries>=2&&s.hint){const e=$("eRule");e.innerHTML="<b>📘 Rappel :</b> "+esc(s.hint);e.classList.remove("hide");}
- if(R.tries>=3&&s.k==="form")say(`✖ La bonne forme est <b>${esc(s.a[0])}</b>. Tape-la.`,"ko");
+ if(R.tries>=3&&s.k==="form"){revealTrad();say(`✖ La bonne forme est <b>${esc(s.a[0])}</b>${trfr(s.glose||gloss(s.a[0]))}. Tape-la.`,"ko");}
  if(R.tries>=3&&s.k==="cas"){const W=Array.isArray(s.cas[0])?s.cas:[s.cas];say(`✖ C'est : <b>${W.map(w=>CASES[w[0]]+" "+(w[1]==="sg"?"singulier":"pluriel")).join(", ")}</b>. Tape-le.`,"ko");}}
 function lessonEnd(){const R=RUN,L=R.L,ls=LS(L.id);$("chWrap").classList.add("hide");$("eGo").classList.add("hide");$("eHint").classList.add("hide");$("ePrompt").textContent="";
  $("eNext").classList.remove("hide");
@@ -642,7 +720,7 @@ const VOIX={bars:{},pending:null,denied:false,cur:null,
  attach(id,o){
   const B={id,o,field:o.field,res:null,redoPi:null,buf:"",last:null,editI:-1};this.bars[id]=B;
   const el=document.createElement("div");el.className="vx";el.id="vx-"+id;
-  el.innerHTML=`<div class="vxrow"><button type="button" class="vxb vxmic">🎤 Dicter</button><button type="button" class="vxb vxpapa">👂 Papa écoute</button><span class="vxst"></span></div>
+  el.innerHTML=`<div class="vxrow"><button type="button" class="vxb vxmic">🎤 Dicter</button><button type="button" class="vxb vxlang vxhide" title="Langue du micro">🇫🇷 français</button><button type="button" class="vxb vxpapa">👂 Papa écoute</button><span class="vxst"></span></div>
    <div class="vxlive"></div><div class="vxchips"></div>
    <div class="vxedit vxhide"><input class="vxein" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><button type="button" class="vxb vxeok">✔ Garder</button><button type="button" class="vxb vxedel">🗑 Effacer</button></div>
    <div class="vxredo vxhide"><div class="vxrt"></div><button type="button" class="vxb vxrmic">🎤 Redire cette partie</button><button type="button" class="vxb vxrkb">⌨️ Taper cette partie</button>
@@ -651,6 +729,7 @@ const VOIX={bars:{},pending:null,denied:false,cur:null,
   const nb=e=>e.addEventListener("pointerdown",ev=>ev.preventDefault());
   el.querySelectorAll("button").forEach(nb);
   q(".vxmic").onclick=()=>this.toggle(B,"main");
+  q(".vxlang").onclick=()=>this.toggleLang(B);
   q(".vxpapa").onclick=()=>this.papaOpen(B);
   q(".vxrmic").onclick=()=>this.toggle(B,"redo");
   q(".vxrkb").onclick=()=>{q(".vxrkbox").classList.remove("vxhide");q(".vxrin").value="";q(".vxrin").focus();};
@@ -661,8 +740,18 @@ const VOIX={bars:{},pending:null,denied:false,cur:null,
   B.field.addEventListener("input",()=>this.chips(B));
   if(!this.SR()||this.denied)q(".vxmic").classList.add("vxhide"),q(".vxrmic").classList.add("vxhide");
   setInterval(()=>this.tick(B),400);this.tick(B);return B;},
- tick(B){const vis=!!(B.field.offsetParent||B.field.getClientRects().length);B.q(".vxrow").classList.toggle("vxhide",!vis);
+ langOf(B){const auto=(typeof B.o.lang==="function"?B.o.lang():B.o.lang)||"fr-FR";if(B.autoLang!==auto){B.autoLang=auto;B.langOver=null;}if(B.langOver)return B.langOver;return auto;},
+langLabel(code){return code==="es-ES"?"🇪🇸 espagnol":"🇫🇷 français";},
+syncLang(B){const btn=B.q(".vxlang");if(!btn)return;const langs=B.o.langs;if(!langs||langs.length<2){btn.classList.add("vxhide");return;}
+  btn.classList.remove("vxhide");const cur=this.langOf(B);btn.textContent=this.langLabel(cur);btn.dataset.lang=cur;
+  btn.title="Langue du micro : "+(cur==="es-ES"?"espagnol":"français")+". Touche pour changer pour cette question.";},
+setQuestionLang(id){const B=this.bars[id];if(!B)return;B.langOver=null;this.syncLang(B);},
+toggleLang(B){const langs=B.o.langs||["fr-FR","es-ES"];const cur=this.langOf(B);const i=Math.max(0,langs.indexOf(cur));B.langOver=langs[(i+1)%langs.length];
+  this.syncLang(B);this.say(B,"Le micro écoute maintenant en "+(B.langOver==="es-ES"?"espagnol":"français")+".","vxon");
+  if(this.cur===B&&B.on){const mode=B.mode;this.stop(B);const self=this;setTimeout(()=>{if(!self.denied)self.start(B,mode);},350);}},
+tick(B){const vis=!!(B.field.offsetParent||B.field.getClientRects().length);B.q(".vxrow").classList.toggle("vxhide",!vis);
   B.q(".vxpapa").classList.toggle("vxhide",!(B.o.papaOK?B.o.papaOK():true));
+  if(vis)this.syncLang(B);
   if(!vis){B.q(".vxchips").classList.add("vxhide");B.q(".vxedit").classList.add("vxhide");if(this.cur===B&&B.mode==="main")this.stop(B);}
   else B.q(".vxchips").classList.remove("vxhide");
   if(B.field.value!==B.last)this.chips(B);},
@@ -680,14 +769,14 @@ const VOIX={bars:{},pending:null,denied:false,cur:null,
  start(B,mode){const SR=this.SR();if(!SR||this.denied){this.unavailable(B,this.denied);return;}
   if(this.cur)this.stop(this.cur);B.mode=mode;B.used=true;B.buf="";this.cur=B;B.on=true;
   let r;try{r=new SR();}catch(e){this.unavailable(B,false);return;}B.rec=r;
-  r.lang="fr-FR";r.interimResults=true;r.continuous=true;r.maxAlternatives=1;
+  r.lang=this.langOf(B);r.interimResults=true;r.continuous=true;r.maxAlternatives=1;
   r.onresult=e=>{let interim="";for(let i=e.resultIndex;i<e.results.length;i++){const x=e.results[i];if(x.isFinal)this.chunk(B,x[0].transcript);else interim+=x[0].transcript;}
    B.q(".vxlive").textContent=interim?"… "+interim:"";};
   r.onerror=e=>{const er=e&&e.error;if(er==="not-allowed"||er==="service-not-allowed"||er==="audio-capture"){B.on=false;this.unavailable(B,er!=="audio-capture");}};
   r.onend=()=>{this.audio();if(B.on&&this.cur===B){setTimeout(()=>{if(B.on&&this.cur===B){try{r.start();}catch(_){}}},250);return;}this.ended(B);};
   try{r.start();}catch(e){this.unavailable(B,false);return;}
   const btn=B.q(mode==="redo"?".vxrmic":".vxmic");btn.classList.add("rec");btn.textContent="⏹ J'ai fini";
-  this.say(B,mode==="redo"?"Je t'écoute. Redis seulement cette partie.":"Je t'écoute. Récite phrase par phrase, je recopie à la suite.","vxon");this.chips(B);},
+  const lab=this.langOf(B)==="es-ES"?" (en espagnol)":" (en français)";this.say(B,mode==="redo"?"Je t'écoute. Redis seulement cette partie."+lab:"Je t'écoute. Récite phrase par phrase, je recopie à la suite."+lab,"vxon");this.chips(B);},
  stop(B){B.on=false;try{B.rec&&B.rec.stop();}catch(e){}if(!B.rec)this.ended(B);setTimeout(()=>{if(this.cur===B)this.ended(B);},900);},
  ended(B){if(this.cur!==B)return;this.cur=null;this.audio();B.q(".vxlive").textContent="";
   B.q(".vxmic").classList.remove("rec");B.q(".vxmic").textContent="🎤 Dicter";B.q(".vxrmic").classList.remove("rec");B.q(".vxrmic").textContent="🎤 Redire cette partie";
@@ -811,13 +900,22 @@ function particles(el,col,n){const r=el.getBoundingClientRect(),w=document.creat
 /* ---------- carte ---------- */
 const won=()=>CREEPERS.reduce((a,c)=>a+(S.done[c.id]?c.pts:0),0);
 function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id===id));}
+function isLatinSentence(s){const w=String(s).replace(/[.,;:!?]/g," ").trim().split(/\s+/).filter(Boolean);return w.length>=3;}
+function decoratePrompt(s){if(!s||!s.p)return s&&s.p||"";let h=s.p;const later=isTradQ(s);
+ if(!/class="trfr"/.test(h)&&!/class='trfr'/.test(h)){
+  h=h.replace(/<b>([^<]+)<\/b>/g,(m,inner)=>{const g=gloss(inner.trim());if(!g)return m;if(isLatinSentence(inner)&&!later)return m;return pair("<b>"+inner+"</b>",g,later);});}
+ if(s.glose&&!/class="trfr"/.test(h)&&!/class='trfr'/.test(h))h+=trfr(s.glose,later);
+ return h;}
+function revealTrad(){const e=$("ePrompt");if(e)e.classList.add("revealed");}
+function micLang(){return "fr-FR";}
+
 function renderGauge(){const w=won();$("gWon").style.width=(w/20*100)+"%";$("gTxt").textContent=fr(9+w)+" / 20";}
 function renderMap(){renderLessons();const P=$("paper");P.innerHTML="";
  for(const ex of [1,2,3,4]){const z=document.createElement("div");z.className="zone";const list=CREEPERS.filter(c=>c.ex===ex);
   const lost=list.reduce((a,c)=>a+c.pts,0),back=list.reduce((a,c)=>a+(S.done[c.id]?c.pts:0),0);
   z.innerHTML=`<h3>${EXN[ex].name}</h3><span class="znote">${EXN[ex].note}</span><div class="mut small">Points perdus : ${fr(lost)} · récupérés : <b>${fr(back)}</b></div><div class="creepers"></div>`;
   list.forEach(c=>{const d=document.createElement("div");const lk=!creeperOpen(c);d.className="cr"+(S.done[c.id]?" done":"")+(lk?" lock":"");d.dataset.id=c.id;
-   d.innerHTML=`<div class="face">${creeper(S.done[c.id])}</div><span class="his">${esc(S.done[c.id]?c.exp:c.his)}</span><span class="nt">${lk?"🔒 apprends d'abord : leçon "+LESSONS.find(L=>L.id===LREQ[c.id]).n:esc(c.notion)}</span><span class="pts">${S.done[c.id]?"✔ +":""}${fr(c.pts)} pt</span>`;
+   d.innerHTML=`<div class="face">${creeper(S.done[c.id])}</div><span class="his">${esc(S.done[c.id]?c.exp:c.his)}${S.done[c.id]&&c.expfr?trfr(c.expfr):""}</span><span class="nt">${lk?"🔒 apprends d'abord : leçon "+LESSONS.find(L=>L.id===LREQ[c.id]).n:esc(c.notion)}</span><span class="pts">${S.done[c.id]?"✔ +":""}${fr(c.pts)} pt</span>`;
    d.onclick=()=>{if(!creeperOpen(c)){SND.ko();toast("Apprends d'abord la leçon "+LESSONS.find(L=>L.id===LREQ[c.id]).n+" : "+LESSONS.find(L=>L.id===LREQ[c.id]).short);return;}SND.click();startCreeper(c.id);};z.querySelector(".creepers").appendChild(d);});
   P.appendChild(z);}
  const left=CREEPERS.filter(c=>!S.done[c.id]).length;$("portal").classList.toggle("open",!left);
@@ -839,7 +937,7 @@ function startCreeper(id,at){const C=CREEPERS.find(c=>c.id===id);RUN={mode:"c",C
 function stepNow(){return RUN.steps[RUN.i];}
 function pipsHTML(){return RUN.steps.map((s,i)=>`<i class="${i<RUN.i?"ok":i===RUN.i?"cur":""}${s.twin?" tw":""}"></i>`).join("");}
 function renderScene(){const R=RUN;if(R.mode==="l")return lessonScene();
- if(R.mode==="c"){const C=R.C;$("eScene").innerHTML=`<div class="bigface" id="bigFace">${creeper(false)}</div><div class="bubble"><b class="q">Sujet : ${esc(C.q)}</b>Sur ta copie : <span class="hisw">${esc(C.his)}</span><div class="mut small">Notion : ${esc(C.notion)} · ${fr(C.pts)} point à récupérer</div></div>`;}
+ if(R.mode==="c"){const C=R.C;$("eScene").innerHTML=`<div class="bigface" id="bigFace">${creeper(false)}</div><div class="bubble"><b class="q">Sujet : ${esc(C.q)}</b>${C.qfr&&R.st&&R.st.trad?trfr(C.qfr):""}Sur ta copie : <span class="hisw">${esc(C.his)}</span><div class="mut small">Notion : ${esc(C.notion)} · ${fr(C.pts)} point à récupérer</div></div>`;}
  else if(R.mode==="b"){const lost=R.max-R.score-R.lost;$("eScene").innerHTML=`<div class="golem" id="bigFace">${golem()}</div><div class="bubble"><b class="q">Le Golem du DT · ${esc(R.part())}</b><div class="bossbar"><div class="hp"><i style="width:${(20-R.score)/20*100}%"></i></div><b>Note : ${fr(R.score)} / 20</b></div><div class="mut small">Chaque bonne réponse lui retire des points de vie. Pas de deuxième essai : c'est un vrai DT.</div></div>`;}
  else $("eScene").innerHTML=`<div class="bigface">${pix(["kkkkkkkk","kccccccK","kcaaaacK","kccccccK","kcaaaacK","kccccccK","kcaaaacK","kkkkkkkk"],{k:"#6b3e1d",K:"#6b3e1d",c:"#f3e6c4",a:"#9b8a66",b:"#000"})}</div><div class="bubble"><b class="q">${esc(TABLES[R.k].title)}</b>${TABLES[R.k].kind==="decl"?"Récite toute la table : du nominatif à l'ablatif, au singulier puis au pluriel.":"Récite toutes les formes dans l'ordre"+(TABLES[R.k].kind==="comp"?", chacune avec son sens.":".")}</div>`;}
 function blocksHTML(words,st,cur){return `<div class="sent">${words.map((w,i)=>{const b=st.blocks[i];return `<div class="blk ${b?b.cls:""}${i===cur?" cur":""}">${esc(w)}${b?`<small>${esc(b.lab)}</small>`:""}</div>`;}).join("")}</div>
@@ -852,11 +950,11 @@ function renderCtx(){const R=RUN,s=stepNow(),E=$("eCtx");if(R.mode==="l")return 
  if(C.ctx==="table-cas"){const F=["sujet / attribut du sujet","apostrophe","COD","complément du nom","COI","complément circonstanciel"];
   E.innerHTML=`<div class="anvil" style="grid-template-columns:130px 1fr">${ORDER.map((c,i)=>`<div class="h">${CASES[c]}</div><div class="${st.rev[i]||i===2||i===4?"ing":"c"}">${i===0&&!st.rev[0]?'<span class="old">COD</span>':st.rev[i]||i===2||i===4?F[i]:"?"}</div>`).join("")}</div>`;}
  else if(C.ctx==="forge"){const T=TABLES[C.tab],num=C.id==="c2"?"sg":"pl",his=C.his.split(" · ");
-  const cell=(n,i)=>{const k=n+i,cur=s&&s.place&&s.place.num===n&&s.place.i===i;
-   if(st.grid[k])return `<div class="ing">${T[n][i]}</div>`;if(n===num&&i<3&&his[i]&&!/barré/.test(his[i]))return `<div class="${cur?"cur":""}"><span class="old">${esc(his[i])}</span></div>`;
-   if(n===num&&C.id==="c3"&&i===3)return `<div class="${cur?"cur":""}"><span class="old">puerorum (barré)</span></div>`;return `<div class="${cur?"cur":"c"}">${cur?"⬅ à forger":"?"}</div>`;};
+  const cell=(n,i)=>{const k=n+i,cur=s&&s.place&&s.place.num===n&&s.place.i===i,frl=trfr(formFr(C.tab,n,i));
+   if(st.grid[k])return `<div class="ing">${T[n][i]}${frl}</div>`;if(n===num&&i<3&&his[i]&&!/barré/.test(his[i]))return `<div class="${cur?"cur":""}"><span class="old">${esc(his[i])}</span>${frl}</div>`;
+   if(n===num&&C.id==="c3"&&i===3)return `<div class="${cur?"cur":""}"><span class="old">puerorum (barré)</span>${frl}</div>`;return `<div class="${cur?"cur":"c"}">${cur?"⬅ à forger":"?"}${frl}</div>`;};
   E.innerHTML=`<div class="anvil"><div class="h">${esc(T.title.split(" :")[0])}</div><div class="h">singulier</div><div class="h">pluriel</div>${ORDER.map((c,i)=>`<div class="h">${CASES[c]}</div>${cell("sg",i)}${cell("pl",i)}`).join("")}</div>`;}
- else if(C.ctx==="forge-conj"){E.innerHTML=`<div class="mut small">Préfixes : de- · prae- · ab- · ad- · pro- (prod- devant voyelle) · pos-/pot- &nbsp;+&nbsp; une forme de sum</div><div class="conj">${(st.forged||[]).map(f=>`<span class="ing">${esc(f)}</span>`).join("")||"<span>…</span>"}</div>`;}
+ else if(C.ctx==="forge-conj"){E.innerHTML=`<div class="mut small">Préfixes : de- · prae- · ab- · ad- · pro- (prod- devant voyelle) · pos-/pot- &nbsp;+&nbsp; une forme de sum</div><div class="conj">${(st.forged||[]).map(f=>`<span class="ing">${esc(f)}${trfr(gloss(f))}</span>`).join("")||"<span>…</span>"}</div>`;}
  else if(C.ctx==="chantier"){const tw=s&&s.ws;const words=tw||C.words;const bst=tw?(st.tw=st.tw||{blocks:{}}):st;
   E.innerHTML=blocksHTML(words,bst,s?s.w:-1)+villaHTML(st.villa)+(st.trad?`<div class="trad">✔ ${esc(st.trad)}</div>`:"");}
  else if(C.ctx==="theme"){const cur=s&&s.slot;E.innerHTML=`<div class="theme">${C.fr.map((f,i)=>{const forged=st.slots[i],bad=C.bad[i]!=null&&!forged;
@@ -864,7 +962,7 @@ function renderCtx(){const R=RUN,s=stepNow(),E=$("eCtx");if(R.mode==="l")return 
 function renderStep(){const R=RUN,s=stepNow();if(!s)return finish();R.tries=0;$("chWrap").classList.remove("hide");
  if(R.mode==="l"){$("ePips").innerHTML=pipsHTML();$("eRule").classList.add("hide");$("eMsg").textContent="";$("eMsg").className="msg";$("eGo").disabled=false;return lessonRender(s);}
  $("ePips").innerHTML=R.mode==="t"?"":pipsHTML();renderScene();renderCtx();
- $("ePrompt").innerHTML=(s.twin?"<span style=\"color:#7b3fb5\">◆ </span>":"")+s.p;
+ $("ePrompt").classList.remove("revealed");$("ePrompt").innerHTML=(s.twin?"<span style=\"color:#7b3fb5\">◆ </span>":"")+decoratePrompt(s);if(window.VOIX)VOIX.setQuestionLang("ch");
  const f=$("ch-in");f.value="";f.placeholder=s.k==="cas"?"ex : ablatif pluriel":s.k==="form"?"forme latine":s.tr?"ta traduction":"ta réponse, avec tes mots";
  f.rows=s.k==="form"||s.k==="cas"?1:(s.tr||R.mode==="t"?3:2);autoGrow();
  $("eRule").classList.add("hide");$("eMsg").textContent="";$("eMsg").className="msg";$("eGo").classList.remove("hide");$("eNext").classList.add("hide");$("eHint").classList.toggle("hide",R.mode==="b");$("eGo").disabled=false;}
@@ -895,12 +993,12 @@ function check(){const R=RUN;if(!R)return;const s=stepNow();const v=$("ch-in").v
  if(r.ok){SND[s.k==="form"?"anvil":"ok"]();apply(s,v);
   let m=s.k==="form"?"✔ Forgé !":s.k==="cas"?"✔ Bien analysé !":"✔ C'est le bon sens !";
   if(r.near)m+=` <span style="color:#b86b00">Ta phrase n'a pas tout, mais le sens y est.</span>`;
-  if(s.tr)m+=`<br>Traduction : « ${esc(s.twin?(s.exp||v):R.C.exp)} »`;
+  if(s.tr){revealTrad();m+=`<br>Traduction : « ${esc(s.twin?(s.exp||v):R.C.exp)} »`;} else if(s.later||isTradQ(s)){revealTrad();if(s.glose)m+=trfr(s.glose);} else if(s.k==="form"&&gloss(s.a[0]))m+=trfr(gloss(s.a[0]));
   say(m,"ok");$("eGo").disabled=true;R.i++;setTimeout(()=>{if(RUN===R)renderStep();},s.tr?1600:850);return;}
  R.tries++;R.errs++;S.err[R.C.id]=(S.err[R.C.id]||0)+1;save();SND.ko();const bf=$("bigFace");if(bf){bf.classList.remove("hurt");void bf.offsetWidth;bf.classList.add("hurt");}
  say("✖ "+koMsg(s,r)+(R.tries===1?" Réessaie, ou touche 💡.":""),"ko");
  if(R.tries>=2&&s.rule){const e=$("eRule");e.innerHTML="<b>📘 La règle :</b> "+esc(s.rule);e.classList.remove("hide");}
- if(R.tries>=3&&s.k==="form")say(`✖ La bonne forme est <b>${esc(s.a[0])}</b>. Tape-la pour la forger.`,"ko");
+ if(R.tries>=3&&s.k==="form"){revealTrad();say(`✖ La bonne forme est <b>${esc(s.a[0])}</b>${trfr(s.glose||gloss(s.a[0]))}. Tape-la pour la forger.`,"ko");}
  if(R.tries>=3&&s.k==="cas")say(`✖ C'est <b>${CASES[s.cas[0]]} ${s.cas[1]==="sg"?"singulier":"pluriel"}</b>. Tape-le, en lisant la règle.`,"ko");
  if(R.tries>=3&&s.k==="sens"&&s.hint)say("✖ "+koMsg(s,r)+" Indice : "+esc(s.hint),"ko");}
 function hint(){const R=RUN;if(!R||R.mode==="b")return;const s=stepNow();if(R.mode==="t"){say("Commence par le nominatif singulier, puis descends jusqu'à l'ablatif. Ensuite le pluriel.","near");return;}
@@ -922,8 +1020,8 @@ function lcs(a,b){const m=a.length,n=b.length,d=Array.from({length:m+1},()=>Arra
 function checkTable(v){const k=RUN.k,T=TABLES[k],E=expected(k);const LAB=/^(nom|nominatif|voc|vocatif|acc|accusatif|gen|genitif|dat|datif|abl|ablatif|singulier|pluriel|sg|pl|sing|plur)$/;
  const U=toks(v).filter(t=>!LAB.test(t));const keep=lcs(E,U);let ok=keep.size===E.length;let extra="";
  if(T.kind==="comp"){const miss=T.keys.filter(g=>!g.some(a=>phraseIn(toks(v),a)));if(miss.length){ok=false;extra=` Il manque le sens de ${miss.length} verbe${miss.length>1?"s":""}.`;}}
- RUN.res=T.kind==="decl"?`<div class="anvil"><div class="h"></div><div class="h">singulier</div><div class="h">pluriel</div>${ORDER.map((c,i)=>`<div class="h">${CASES[c]}</div><div class="${keep.has(i)?"ing":"c"}">${keep.has(i)?T.sg[i]:"?"}</div><div class="${keep.has(6+i)?"ing":"c"}">${keep.has(6+i)?T.pl[i]:"?"}</div>`).join("")}</div>`
-  :`<div class="conj">${E.map((f,i)=>`<span class="${keep.has(i)?"ing":""}">${keep.has(i)?f:"?"}</span>`).join("")}</div>`;
+ RUN.res=T.kind==="decl"?`<div class="anvil"><div class="h"></div><div class="h">singulier</div><div class="h">pluriel</div>${ORDER.map((c,i)=>`<div class="h">${CASES[c]}</div><div class="${keep.has(i)?"ing":"c"}">${keep.has(i)?T.sg[i]+trfr(formFr(k,"sg",i)):"?"}</div><div class="${keep.has(6+i)?"ing":"c"}">${keep.has(6+i)?T.pl[i]+trfr(formFr(k,"pl",i)):"?"}</div>`).join("")}</div>`
+  :`<div class="conj">${E.map((f,i)=>`<span class="${keep.has(i)?"ing":""}">${keep.has(i)?f+trfr(T.fr[i]):"?"}</span>`).join("")}</div>`;
  renderCtx();
  if(ok){SND.level();say("✔ Table complète, dans l'ordre ! Fais-la valider par papa avec 👂 Papa écoute.","ok");}
  else{SND.ko();const n=E.length-keep.size;say(`✖ ${n?`${n} forme${n>1?"s":""} manquante${n>1?"s":""} ou fausse${n>1?"s":""} (les « ? »).`:""}${extra} Corrige et revalide.`,"ko");}}
@@ -951,8 +1049,8 @@ function startBoss(force){if(!force&&CREEPERS.some(c=>!S.done[c.id])){toast("Fai
 function bossCheck(s,v){const R=RUN;const r=evalStep(s,v);let got=0;
  if(r.ok)got=s.pts;else if(s.k==="sens"&&s.tr&&!(r.forb&&r.forb.length)&&r.score>=.5)got=s.pts/2;else if(s.k==="cas"&&r.n>1&&r.score>=.5)got=s.pts/2;
  R.score+=got;R.lost+=s.pts-got;R.log.push({p:s.p.replace(/<[^>]+>/g,""),v,ok:got===s.pts,got,pts:s.pts,sol:s.sol});
- if(got===s.pts){SND.hurt();say(`✔ Juste ! +${fr(got)}`,"ok");const g=$("bigFace");g.classList.remove("hurt");void g.offsetWidth;g.classList.add("hurt");R.i++;$("eGo").disabled=true;setTimeout(()=>{if(RUN===R)renderStep();},700);}
- else{SND.ko();say(`${got?"◐ À moitié : +"+fr(got)+". ":"✖ "}Réponse attendue : <b>${esc(s.sol)}</b>`,got?"near":"ko");R.i++;$("eGo").classList.add("hide");$("eNext").classList.remove("hide");$("eNext").textContent="Continuer ➜";}
+ if(got===s.pts){SND.hurt();if(s.tr||s.later||isTradQ(s))revealTrad();say(`✔ Juste ! +${fr(got)}`+(s.tr?`<br>Traduction : « ${esc(s.sol)} »`:""),"ok");const g=$("bigFace");g.classList.remove("hurt");void g.offsetWidth;g.classList.add("hurt");R.i++;$("eGo").disabled=true;setTimeout(()=>{if(RUN===R)renderStep();},700);}
+ else{SND.ko();revealTrad();const solfr=s.tr?"":trfr(s.glose||gloss(s.sol)||"");say(`${got?"◐ À moitié : +"+fr(got)+". ":"✖ "}Réponse attendue : <b>${esc(s.sol)}</b>${solfr}`,got?"near":"ko");R.i++;$("eGo").classList.add("hide");$("eNext").classList.remove("hide");$("eNext").textContent="Continuer ➜";}
  renderScene();}
 function bossEnd(){const R=RUN,sc=Math.round(R.score*4)/4;$("chWrap").classList.add("hide");S.boss.push({d:new Date().toISOString().slice(0,10),score:sc});save();
  $("ePips").innerHTML="";$("ePrompt").textContent="";$("eGo").classList.add("hide");$("eHint").classList.add("hide");$("eNext").classList.remove("hide");$("eNext").textContent="Retour à la copie ➜";
@@ -977,8 +1075,8 @@ $("eNext").onclick=()=>{if(!RUN)return;if(RUN.mode==="l"){const s=stepNow();if(s
 $("ch-in").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();if(!$("eGo").classList.contains("hide")&&!$("eGo").disabled)check();else if(!$("eNext").classList.contains("hide"))$("eNext").click();}});
 $("ch-in").addEventListener("input",autoGrow);
 const papaFiche=()=>{if(!RUN)return null;if(RUN.mode==="t")return RUN.k;if(RUN.mode==="l"){const s=stepNow();if(s&&s.k==="memo"&&s.pass===4)return RUN.L.id;}return null;};
-VOIX.attach("ch",{field:$("ch-in"),anchor:$("chWrap"),fiche:papaFiche,papaOK:()=>!!papaFiche(),canRedo:()=>false,papa:(g,f)=>RUN&&RUN.mode==="l"?lessonPapa(g):tablePapa(g,f),retry:()=>{}});
-window.__ch={S:()=>S,LESSONS,LREQ,startLesson,checkMemo,memoKeys,mastered,dueLessons,RUN:()=>RUN,CREEPERS,TABLES,checkSens,checkForm,checkCas,parseCas,startCreeper,startBoss,openTable,renderMap,won,
+VOIX.attach("ch",{field:$("ch-in"),anchor:$("chWrap"),lang:()=>micLang(),fiche:papaFiche,papaOK:()=>!!papaFiche(),canRedo:()=>false,papa:(g,f)=>RUN&&RUN.mode==="l"?lessonPapa(g):tablePapa(g,f),retry:()=>{}});
+window.__ch={S:()=>S,LESSONS,LREQ,startLesson,checkMemo,memoKeys,mastered,dueLessons,RUN:()=>RUN,CREEPERS,TABLES,checkSens,checkForm,checkCas,parseCas,startCreeper,startBoss,openTable,renderMap,won,renderStep,decoratePrompt,isTradQ,gloss,micLang,formFr,
  test:{unlockAll(){LESSONS.forEach(L=>{const l=LS(L.id);l.m=true;l.pass=4;l.next=addDays(today(),1);});save();renderMap();},lecon(){show("map");renderMap();startLesson("L1");RUN.i=2;renderStep();},leconTest(){show("map");this.unlockAll();startLesson("L1");RUN.i=RUN.steps.findIndex(s=>s.test);renderStep();},
   forge(){show("map");renderMap();startCreeper("c2",1);},explain(){show("map");renderMap();startCreeper("c2",0);},chantierWhy(){show("map");renderMap();startCreeper("c7",5);},
   chantierTrad(){show("map");renderMap();startCreeper("c7",7);},boss(){show("map");renderMap();startBoss(true);RUN.i=3;renderStep();},
